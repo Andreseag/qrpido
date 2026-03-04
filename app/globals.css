@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
 :root {
+  /* Paleta Base - Limpia y Moderna */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a; /* Un azul casi negro para mejor lectura */
+
+  /* Identidad QRPido */
+  --qrpido-blue: #0052ff;
+  --qrpido-blue-soft: rgba(0, 82, 255, 0.1);
+
+  /* Estados */
+  --success: #10b981;
+  --error: #ef4444;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-qrpido-blue: var(--qrpido-blue);
+  --color-qrpido-soft: var(--qrpido-blue-soft);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #020617; /* Fondo marino profundo */
+    --foreground: #f8fafc;
+    --qrpido-blue-soft: rgba(0, 82, 255, 0.2);
   }
 }
 
+/* 🧬 Estilos Base Reiniciados */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease;
+}
+
+/* ✨ Utilidades de QRPido */
+@layer components {
+  /* El botón "Ferrari" que usaremos en toda la app */
+  .btn-primary {
+    @apply bg-qrpido-blue text-white px-6 py-3 rounded-xl font-bold 
+           transition-all hover:scale-[1.02] active:scale-95 
+           shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2;
+  }
+
+  /* El switch de inventario que querías */
+  .status-badge {
+    @apply px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider;
+  }
+}
+
+/* 🌀 Animación de Carga Firma de la Marca */
+@keyframes qrpido-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+}
+
+.animate-qrpido {
+  animation: qrpido-pulse 2s infinite ease-in-out;
 }

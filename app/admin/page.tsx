@@ -179,7 +179,7 @@ export default function AdminDashboard() {
     );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-foreground">
+    <div className="bg-slate-50 dark:bg-slate-950 text-foreground">
       {/* 🧭 Navbar Superior */}
       <nav className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
@@ -236,7 +236,7 @@ export default function AdminDashboard() {
         <div className="flex justify-end">
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="btn-primary mb-4">
+            className="btn-primary mb-4 cursor-pointer">
             <Plus className="w-5 h-5" /> Nuevo Producto
           </button>
         </div>

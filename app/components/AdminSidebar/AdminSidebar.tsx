@@ -13,6 +13,7 @@ import {
   MessageCircle,
   Bike,
   UserCheck,
+  Settings,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
@@ -112,13 +113,19 @@ export default function AdminSidebar() {
     {
       name: "Clientes",
       href: "/admin/clientes",
-      icon: Users,
+      icon: Settings,
       roles: ["owner"],
     },
     {
       name: "Campañas WhatsApp",
       href: "/admin/campaigns",
       icon: MessageCircle,
+      roles: ["owner"],
+    },
+    {
+      name: "Configuración",
+      href: "/admin/settings",
+      icon: Store,
       roles: ["owner"],
     },
   ];

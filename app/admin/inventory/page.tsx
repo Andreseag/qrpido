@@ -132,7 +132,7 @@ export default function AdminInventoryPage() {
           stock: formData.stock,
         })
         .eq("id", editingProduct.id)
-        .select(); // <--- Clave para obligar a devolver los datos modificados
+        .select();
 
       console.log("Respuesta de Supabase - Update:", { data, error });
 

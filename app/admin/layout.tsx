@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 import FloatingOrderManager from "../components/FloatingOrderManager/FloatingOrderManager";
-import FloatingWhatsAppChat from "../components/FloatingWhatsAppChat/FloatingWhatsAppChat";
-import WhatsAppFloatingWidget from "../components/WhatsAppFloatingWidget/WhatsAppFloatingWidget";
+// import FloatingWhatsAppChat from "../components/FloatingWhatsAppChat/FloatingWhatsAppChat";
+// import WhatsAppFloatingWidget from "../components/WhatsAppFloatingWidget/WhatsAppFloatingWidget";
 
 export default function AdminLayout({
   children,
@@ -71,7 +71,7 @@ export default function AdminLayout({
         initialClientData={clientDataToOrder} // Le pasamos el nombre y teléfono autocompletados
         restaurantId={restaurantId}
       />
-      <WhatsAppFloatingWidget restaurantId={restaurantId} />
+      {/* <WhatsAppFloatingWidget restaurantId={restaurantId} /> */}
     </div>
   );
 }

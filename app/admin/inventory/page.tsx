@@ -58,19 +58,19 @@ export default function AdminInventoryPage() {
     } = await supabase.auth.getSession();
     if (!session) return;
 
-    const { data: restaurant } = await supabase
-      .from("restaurants")
-      .select("id")
-      .eq("owner_id", session.user.id)
+    const { data: member } = await supabase
+      .from("restaurant_members")
+      .select("restaurant_id")
+      .eq("user_id", session.user.id)
       .maybeSingle();
 
-    if (!restaurant) return;
-    setRestaurantId(restaurant.id);
+    if (!member) return;
+    setRestaurantId(member.restaurant_id);
 
     const { data: productsData } = await supabase
       .from("products")
       .select("*")
-      .eq("restaurant_id", restaurant.id)
+      .eq("restaurant_id", member.restaurant_id)
       .order("name");
 
     if (productsData) setProducts(productsData);

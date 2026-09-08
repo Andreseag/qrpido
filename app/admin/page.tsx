@@ -44,11 +44,22 @@ export default function AdminDashboardPage() {
   const fetchDashboardData = async (userId: string) => {
     setLoading(true);
     try {
-      const { data: restaurant, error: restError } = await supabase
-        .from("restaurants")
-        .select("id, name")
-        .eq("owner_id", userId)
+      const { data: member, error: restError } = await supabase
+        .from("restaurant_members")
+        .select(
+          `
+          restaurants (
+            id,
+            name
+          )
+        `,
+        )
+        .eq("user_id", userId)
         .maybeSingle();
+
+      const restaurant = Array.isArray(member?.restaurants)
+        ? member.restaurants[0]
+        : member?.restaurants;
 
       if (restError || !restaurant) {
         setRestaurantName("Sin Restaurante Asignado");

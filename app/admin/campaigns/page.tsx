@@ -44,26 +44,27 @@ export default function AdminCampaignsPage() {
     } = await supabase.auth.getSession();
     if (!session) return;
 
-    const { data: restaurant } = await supabase
-      .from("restaurants")
-      .select("id")
-      .eq("owner_id", session.user.id)
+    const { data: member } = await supabase
+      .from("restaurant_members")
+      .select("restaurant_id")
+      .eq("user_id", session.user.id)
       .maybeSingle();
 
-    if (!restaurant) return;
-    setRestaurantId(restaurant.id);
+    if (!member) return;
+    const restaurantId = member.restaurant_id;
+    setRestaurantId(restaurantId);
 
     // Obtener clientes
     const { data: customersData } = await supabase
       .from("customers")
       .select("*")
-      .eq("restaurant_id", restaurant.id);
+      .eq("restaurant_id", restaurantId);
 
     // Obtener órdenes
     const { data: ordersData } = await supabase
       .from("orders")
       .select("id, customer_id, created_at, total_price, items")
-      .eq("restaurant_id", restaurant.id);
+      .eq("restaurant_id", restaurantId);
 
     if (customersData && ordersData) {
       const now = new Date().getTime();

@@ -31,14 +31,14 @@ export default function AdminLayout({
         return;
       }
 
-      const { data: restaurant, error } = await supabase
-        .from("restaurants")
-        .select("id")
-        .eq("owner_id", session.user.id)
+      const { data: member, error } = await supabase
+        .from("restaurant_members")
+        .select("restaurant_id")
+        .eq("user_id", session.user.id)
         .maybeSingle();
 
-      if (restaurant) {
-        setRestaurantId(restaurant.id);
+      if (member) {
+        setRestaurantId(member.restaurant_id);
       }
       setLoading(false);
     };

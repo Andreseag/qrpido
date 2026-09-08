@@ -45,24 +45,24 @@ export default function CustomersPage() {
       return;
     }
 
-    const { data: restaurant } = await supabase
-      .from("restaurants")
-      .select("id")
-      .eq("owner_id", session.user.id)
+    const { data: member } = await supabase
+      .from("restaurant_members")
+      .select("restaurant_id")
+      .eq("user_id", session.user.id)
       .maybeSingle();
 
-    if (!restaurant) {
+    if (!member) {
       setLoading(false);
       return;
     }
 
-    setRestaurantId(restaurant.id);
+    const restaurantId = member.restaurant_id;
+    setRestaurantId(restaurantId);
 
-    // Se usa restaurant.id directamente para evitar el problema de estado asíncrono
     const { data, error } = await supabase
       .from("customers")
       .select("*")
-      .eq("restaurant_id", restaurant.id)
+      .eq("restaurant_id", restaurantId)
       .order("created_at", { ascending: false });
 
     if (data) {

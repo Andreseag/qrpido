@@ -10,18 +10,21 @@ import {
   ConfirmDialogState,
   PaymentMethod,
 } from "../types";
+import { useSelectedRestaurant } from "@/app/context/Selectedrestaurantcontext";
 
 export function useAdminTables() {
   const [tables, setTables] = useState<Table[]>([]);
   const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [restaurantId, setRestaurantId] = useState<number | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(
     null,
   );
   const [isSaving, setIsSaving] = useState(false);
+
+  // Selección persistida globalmente (Context + localStorage)
+  const { selectedRestaurantId } = useSelectedRestaurant();
 
   const showToast = useCallback(
     (message: string, type: ToastState["type"] = "success") => {
@@ -32,6 +35,14 @@ export function useAdminTables() {
   );
 
   const fetchAllData = useCallback(async () => {
+    if (!selectedRestaurantId) {
+      setLoading(false);
+      setTables([]);
+      setActiveOrders([]);
+      setProducts([]);
+      return;
+    }
+
     setLoading(true);
     const {
       data: { session },
@@ -41,46 +52,31 @@ export function useAdminTables() {
       return;
     }
 
-    // 1. Obtener el restaurante mediante restaurant_members (soporta dueños y empleados/cajeros)
-    const { data: memberData, error: memberError } = await supabase
-      .from("restaurant_members")
-      .select("restaurant_id")
-      .eq("user_id", session.user.id)
-      .maybeSingle();
-
-    if (memberError || !memberData) {
-      setLoading(false);
-      return;
-    }
-
-    const currentRestaurantId = memberData.restaurant_id;
-    setRestaurantId(currentRestaurantId);
-
-    // 2. Mesas
+    // 1. Mesas
     const { data: tablesData } = await supabase
       .from("tables")
       .select("*")
-      .eq("restaurant_id", currentRestaurantId)
+      .eq("restaurant_id", selectedRestaurantId)
       .order("number", { ascending: true });
     if (tablesData) setTables(tablesData);
 
-    // 3. Órdenes activas (excluyendo pagadas)
+    // 2. Órdenes activas (excluyendo pagadas)
     const { data: ordersData } = await supabase
       .from("orders")
       .select("id, table_id, total_price, state, items, note, created_at")
-      .eq("restaurant_id", currentRestaurantId)
+      .eq("restaurant_id", selectedRestaurantId)
       .in("state", ["pendiente", "preparado", "listo", "entregado"]);
     if (ordersData) setActiveOrders(ordersData as ActiveOrder[]);
 
-    // 4. Productos del menú
+    // 3. Productos del menú
     const { data: productsData } = await supabase
       .from("products")
       .select("id, name, price")
-      .eq("restaurant_id", currentRestaurantId);
+      .eq("restaurant_id", selectedRestaurantId);
     if (productsData) setProducts(productsData);
 
     setLoading(false);
-  }, []);
+  }, [selectedRestaurantId]);
 
   useEffect(() => {
     fetchAllData();
@@ -89,10 +85,10 @@ export function useAdminTables() {
   // --- CRUD DE MESAS ---
   const createTable = useCallback(
     async (number: number) => {
-      if (restaurantId === null) return false;
+      if (selectedRestaurantId === null) return false;
       const { data, error } = await supabase
         .from("tables")
-        .insert([{ number, restaurant_id: restaurantId }])
+        .insert([{ number, restaurant_id: selectedRestaurantId }])
         .select();
 
       if (error) {
@@ -106,7 +102,7 @@ export function useAdminTables() {
       }
       return false;
     },
-    [restaurantId, showToast],
+    [selectedRestaurantId, showToast],
   );
 
   const updateTable = useCallback(
@@ -161,7 +157,7 @@ export function useAdminTables() {
       cart: OrderItem[],
       note: string,
     ) => {
-      if (restaurantId === null) return false;
+      if (selectedRestaurantId === null) return false;
       if (cart.length === 0) {
         showToast(
           "Selecciona al menos un producto nuevo para enviar.",
@@ -180,7 +176,7 @@ export function useAdminTables() {
         .from("orders")
         .insert([
           {
-            restaurant_id: restaurantId,
+            restaurant_id: selectedRestaurantId,
             table_id: tableId,
             order_type: "mesa",
             state: "pendiente",
@@ -205,7 +201,7 @@ export function useAdminTables() {
       }
       return false;
     },
-    [restaurantId, showToast],
+    [selectedRestaurantId, showToast],
   );
 
   // --- PAGOS ---
@@ -224,7 +220,7 @@ export function useAdminTables() {
 
       const { error: paymentError } = await supabase.from("payments").insert([
         {
-          restaurant_id: restaurantId,
+          restaurant_id: selectedRestaurantId,
           table_id: tableId,
           amount: grandTotal,
           tip_amount: tipAmount,
@@ -253,7 +249,7 @@ export function useAdminTables() {
       showToast("Error al cobrar cuenta: " + error.message, "error");
       return false;
     },
-    [activeOrders, restaurantId, showToast],
+    [activeOrders, selectedRestaurantId, showToast],
   );
 
   return {

@@ -3,18 +3,21 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 import { Order, OrderState } from "../types";
+import { useSelectedRestaurant } from "@/app/context/Selectedrestaurantcontext";
 
 export function useDeliveryOrders() {
   const [user, setUser] = useState<any>(null);
-  const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [configError, setConfigError] = useState<string | null>(null);
   const router = useRouter();
 
-  // 1. Validar sesión y obtener el ID del restaurante
+  // Selección persistida globalmente (Context + localStorage)
+  const { selectedRestaurantId } = useSelectedRestaurant();
+
+  // 1. Validar sesión al montar
   useEffect(() => {
-    const initDelivery = async () => {
+    const checkSession = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -23,45 +26,36 @@ export function useDeliveryOrders() {
         return;
       }
       setUser(session.user);
-
-      const { data: memberData, error } = await supabase
-        .from("restaurant_members")
-        .select("restaurant_id")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
-
-      if (error || !memberData) {
-        setConfigError(
-          "No se encontró un restaurante asociado a este usuario.",
-        );
-        setLoading(false);
-        return;
-      }
-
-      setRestaurantId(memberData.restaurant_id);
     };
 
-    initDelivery();
+    checkSession();
   }, [router]);
 
-  // 2. Cargar órdenes de domicilio y activar Supabase Realtime
+  // 2. Cargar órdenes de domicilio y activar Supabase Realtime según el restaurante seleccionado
   useEffect(() => {
-    if (!restaurantId) return;
+    if (!selectedRestaurantId) {
+      setLoading(false);
+      setOrders([]);
+      setConfigError(null);
+      return;
+    }
 
     const fetchOrders = async () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("orders")
         .select("*")
-        .eq("restaurant_id", restaurantId)
+        .eq("restaurant_id", selectedRestaurantId)
         .eq("order_type", "domicilio")
         .neq("state", "cancelado")
         .order("created_at", { ascending: false });
 
       if (error) {
         console.error("Error al cargar órdenes de domicilio:", error);
+        setConfigError("Error al cargar las órdenes de domicilio.");
       } else if (data) {
         setOrders(data as Order[]);
+        setConfigError(null);
       }
       setLoading(false);
     };
@@ -69,14 +63,14 @@ export function useDeliveryOrders() {
     fetchOrders();
 
     const channel = supabase
-      .channel(`delivery-channel-${restaurantId}`)
+      .channel(`delivery-channel-${selectedRestaurantId}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "orders",
-          filter: `restaurant_id=eq.${restaurantId}`,
+          filter: `restaurant_id=eq.${selectedRestaurantId}`,
         },
         (payload: any) => {
           const newOrder = payload.new as Order;
@@ -116,7 +110,7 @@ export function useDeliveryOrders() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [restaurantId]);
+  }, [selectedRestaurantId]);
 
   // 3. Cambiar estado del pedido
   const updateOrderState = useCallback(
@@ -139,6 +133,7 @@ export function useDeliveryOrders() {
 
   return {
     user,
+    restaurantId: selectedRestaurantId,
     orders,
     loading,
     configError,

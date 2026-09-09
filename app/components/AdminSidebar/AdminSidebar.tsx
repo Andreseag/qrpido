@@ -18,6 +18,7 @@ import {
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { AppRole, useUserRole } from "@/app/hooks/useUserRole";
+import RestaurantSwitcher from "../RestaurantSwitcher/RestaurantSwitcher";
 
 interface NavItem {
   name: string;
@@ -41,6 +42,7 @@ export default function AdminSidebar() {
   const router = useRouter();
   const { role, loading } = useUserRole();
   const [userName, setUserName] = useState<string>("");
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -49,6 +51,8 @@ export default function AdminSidebar() {
       } = await supabase.auth.getSession();
 
       if (!session) return;
+
+      setUserId(session.user.id);
 
       // Consultar el nombre personalizado desde restaurant_members
       const { data: memberData, error } = await supabase
@@ -113,7 +117,7 @@ export default function AdminSidebar() {
     {
       name: "Clientes",
       href: "/admin/clientes",
-      icon: Settings,
+      icon: Users,
       roles: ["owner"],
     },
     {
@@ -125,7 +129,7 @@ export default function AdminSidebar() {
     {
       name: "Configuración",
       href: "/admin/settings",
-      icon: Store,
+      icon: Settings,
       roles: ["owner"],
     },
   ];
@@ -154,6 +158,9 @@ export default function AdminSidebar() {
             </p>
           </div>
         </div>
+
+        {/* Selector de Restaurante (solo aparece si administra más de uno) */}
+        <RestaurantSwitcher userId={userId} />
 
         {/* Info del Usuario Logueado (Perfil) */}
         <div className="px-6 py-4 border-b border-slate-800/60 bg-slate-950/30 flex items-center gap-3">

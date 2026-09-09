@@ -55,10 +55,11 @@ export default function AdminCampaignsPage() {
     setRestaurantId(restaurantId);
 
     // Obtener clientes
-    const { data: customersData } = await supabase
+    const { data: customersData, error } = await supabase
       .from("customers")
       .select("*")
-      .eq("restaurant_id", restaurantId);
+      .eq("restaurant_id", restaurantId)
+      .order("created_at", { ascending: false });
 
     // Obtener órdenes
     const { data: ordersData } = await supabase

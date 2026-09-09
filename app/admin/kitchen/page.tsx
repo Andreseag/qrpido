@@ -49,7 +49,7 @@ export default function KitchenPage() {
   const [configError, setConfigError] = useState<string | null>(null);
   const router = useRouter();
 
-  // 1. Validar sesión y obtener el ID del restaurante mediante restaurant_members
+  // 1. Validar sesión y obtener el ID del restaurante activo con soporte para múltiples sucursales
   useEffect(() => {
     const initKitchen = async () => {
       const {
@@ -61,13 +61,12 @@ export default function KitchenPage() {
       }
       setUser(session.user);
 
-      const { data: memberData, error } = await supabase
+      const { data: membersData, error } = await supabase
         .from("restaurant_members")
         .select("restaurant_id")
-        .eq("user_id", session.user.id)
-        .maybeSingle();
+        .eq("user_id", session.user.id);
 
-      if (error || !memberData) {
+      if (error || !membersData || membersData.length === 0) {
         setConfigError(
           "No se encontró un restaurante asociado a este usuario.",
         );
@@ -75,7 +74,20 @@ export default function KitchenPage() {
         return;
       }
 
-      setRestaurantId(memberData.restaurant_id);
+      const savedRestId = localStorage.getItem("active_restaurant_id");
+      let activeId: string | null = savedRestId ? savedRestId : null;
+
+      const isValidActive = membersData.some(
+        (m: any) => m.restaurant_id.toString() === activeId,
+      );
+
+      if (!isValidActive) {
+        const fallbackId = membersData[0].restaurant_id.toString();
+        activeId = fallbackId;
+        localStorage.setItem("active_restaurant_id", fallbackId);
+      }
+
+      setRestaurantId(activeId);
     };
 
     initKitchen();

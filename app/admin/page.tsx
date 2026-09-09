@@ -1,185 +1,56 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { DollarSign, ShoppingBag, TrendingUp, ReceiptText } from "lucide-react";
-import { DateRange } from "react-day-picker";
-import DashboardFilterBar, {
-  FilterType,
-} from "../components/AdminDashboard/DashboardFilterBar/DashboardFilterBar";
-import { supabase } from "../lib/supabase";
+import {
+  DollarSign,
+  ShoppingBag,
+  TrendingUp,
+  ReceiptText,
+  Store,
+} from "lucide-react";
+import DashboardFilterBar from "../components/AdminDashboard/DashboardFilterBar/DashboardFilterBar";
 import DashboardHeader from "../components/AdminDashboard/DashboardHeader/DashboardHeader";
 import MetricCard from "../components/AdminDashboard/MetricCard/MetricCard";
 import TopProductsCard from "../components/AdminDashboard/TopProductsCard/TopProductsCard";
 import RecentOrdersCard from "../components/AdminDashboard/RecentOrdersCard/RecentOrdersCard";
-import { Order, TopProduct } from "../types/dashboard";
 import { RoleGuard } from "../components/Auth/RoleGuard/RoleGuard";
+import { useAdminDashboard } from "./hooks/useAdminDashboard";
+import RestaurantSelector from "../components/Restaurantselector/Restaurantselector";
 
 export default function AdminDashboardPage() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [restaurantName, setRestaurantName] = useState("Cargando...");
-  const [rawOrders, setRawOrders] = useState<Order[]>([]);
+  const {
+    loading,
+    restaurants,
+    needsSelection,
+    restaurantName,
+    selectRestaurant,
+    changeRestaurant,
+    filter,
+    setFilter,
+    dateRange,
+    setDateRange,
+    filteredOrders,
+    metrics,
+    refresh,
+  } = useAdminDashboard();
 
-  // Estados de Filtros Pro
-  const [filter, setFilter] = useState<FilterType>("month");
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
-
-  const router = useRouter();
-
-  useEffect(() => {
-    const checkUserAndFetch = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        router.push("/login");
-        return;
-      }
-      setUser(session.user);
-      await fetchDashboardData(session.user.id);
-    };
-    checkUserAndFetch();
-  }, [router]);
-
-  const fetchDashboardData = async (userId: string) => {
-    setLoading(true);
-    try {
-      const { data: member, error: restError } = await supabase
-        .from("restaurant_members")
-        .select(
-          `
-          restaurants (
-            id,
-            name
-          )
-        `,
-        )
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      const restaurant = Array.isArray(member?.restaurants)
-        ? member.restaurants[0]
-        : member?.restaurants;
-
-      if (restError || !restaurant) {
-        setRestaurantName("Sin Restaurante Asignado");
-        setLoading(false);
-        return;
-      }
-
-      setRestaurantName(restaurant.name);
-
-      const { data: ordersData, error: ordersError } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("restaurant_id", restaurant.id)
-        .order("created_at", { ascending: false });
-
-      if (ordersError) throw ordersError;
-
-      setRawOrders((ordersData || []) as Order[]);
-    } catch (error) {
-      console.error("Error al cargar dashboard:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Filtrado reactivo con soporte para DateRange de react-day-picker
-  const filteredOrders = useMemo(() => {
-    if (!rawOrders.length) return [];
-    const now = new Date();
-
-    return rawOrders.filter((order) => {
-      const orderDate = new Date(order.created_at);
-
-      if (filter === "day") {
-        const twentyFourHoursAgo = new Date(
-          now.getTime() - 24 * 60 * 60 * 1000,
-        );
-        return orderDate >= twentyFourHoursAgo;
-      }
-      if (filter === "week") {
-        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        return orderDate >= oneWeekAgo;
-      }
-      if (filter === "month") {
-        const oneMonthAgo = new Date(
-          now.getFullYear(),
-          now.getMonth() - 1,
-          now.getDate(),
-        );
-        return orderDate >= oneMonthAgo;
-      }
-      if (filter === "custom") {
-        if (!dateRange?.from) return true;
-        const start = new Date(dateRange.from);
-        start.setHours(0, 0, 0, 0);
-
-        const end = dateRange.to
-          ? new Date(dateRange.to)
-          : new Date(dateRange.from);
-        end.setHours(23, 59, 59, 999);
-
-        return orderDate >= start && orderDate <= end;
-      }
-      return true; // "all"
-    });
-  }, [rawOrders, filter, dateRange]);
-
-  // (El resto de cálculos de métricas y return se mantiene exactamente igual...)
   const {
     totalRevenue,
     totalOrdersCount,
     averageTicket,
     totalNetProfit,
     topProducts,
-  } = useMemo(() => {
-    let revenue = 0;
-    let netProfit = 0;
-    const count = filteredOrders.length;
-    const productMap: { [key: string]: { quantity: number; revenue: number } } =
-      {};
+  } = metrics;
 
-    filteredOrders.forEach((order) => {
-      revenue += Number(order.total_price) || 0;
-      if (order.items && Array.isArray(order.items)) {
-        order.items.forEach((item: any) => {
-          const itemName = item.name || "Producto sin nombre";
-          const qty = Number(item.quantity) || 1;
-          const itemRevenue = (Number(item.price) || 0) * qty;
-          const itemCost = (Number(item.cost) || 0) * qty;
-
-          netProfit += itemRevenue - itemCost;
-
-          if (!productMap[itemName]) {
-            productMap[itemName] = { quantity: 0, revenue: 0 };
-          }
-          productMap[itemName].quantity += qty;
-          productMap[itemName].revenue += itemRevenue;
-        });
-      }
-    });
-
-    const avg = count > 0 ? revenue / count : 0;
-
-    const sortedProducts: TopProduct[] = Object.keys(productMap)
-      .map((name) => ({
-        name,
-        quantity: productMap[name].quantity,
-        revenue: productMap[name].revenue,
-      }))
-      .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 5);
-
-    return {
-      totalRevenue: revenue,
-      totalOrdersCount: count,
-      averageTicket: avg,
-      totalNetProfit: netProfit,
-      topProducts: sortedProducts,
-    };
-  }, [filteredOrders]);
+  // Tiene más de un restaurante y todavía no ha elegido cuál ver
+  if (needsSelection) {
+    return (
+      <RoleGuard allowedRoles={["owner"]}>
+        <RestaurantSelector
+          restaurants={restaurants}
+          onSelect={selectRestaurant}
+        />
+      </RoleGuard>
+    );
+  }
 
   return (
     <RoleGuard allowedRoles={["owner"]}>
@@ -187,8 +58,16 @@ export default function AdminDashboardPage() {
         <main className="flex-1 p-6 md:p-10 overflow-y-auto">
           <DashboardHeader
             restaurantName={restaurantName}
-            onRefresh={() => user && fetchDashboardData(user.id)}
+            onRefresh={refresh}
           />
+
+          {restaurants.length > 1 && (
+            <button
+              onClick={changeRestaurant}
+              className="mb-8 -mt-3 flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer">
+              <Store className="w-3.5 h-3.5" /> Cambiar restaurante
+            </button>
+          )}
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-32">

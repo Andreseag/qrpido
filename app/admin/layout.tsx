@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 import FloatingOrderManager from "../components/FloatingOrderManager/FloatingOrderManager";
+import { SelectedRestaurantProvider } from "../context/Selectedrestaurantcontext";
 // import FloatingWhatsAppChat from "../components/FloatingWhatsAppChat/FloatingWhatsAppChat";
 // import WhatsAppFloatingWidget from "../components/WhatsAppFloatingWidget/WhatsAppFloatingWidget";
 
@@ -47,15 +48,16 @@ export default function AdminLayout({
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
-      {/* El Sidebar permanece fijo en todo el sistema admin */}
-      <AdminSidebar />
+    <SelectedRestaurantProvider>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+        {/* El Sidebar permanece fijo en todo el sistema admin */}
+        <AdminSidebar />
 
-      {/* Contenido dinámico de la página actual */}
-      <main className="flex-1 overflow-y-auto min-h-screen">{children}</main>
+        {/* Contenido dinámico de la página actual */}
+        <main className="flex-1 overflow-y-auto min-h-screen">{children}</main>
 
-      {/* 🟢 1. El Chat Flotante de WhatsApp */}
-      {/* <FloatingWhatsAppChat
+        {/* 🟢 1. El Chat Flotante de WhatsApp */}
+        {/* <FloatingWhatsAppChat
         onConvertToOrder={(clientData) => {
           // Guardamos los datos del cliente que vienen del chat
           setClientDataToOrder(clientData);
@@ -64,14 +66,15 @@ export default function AdminLayout({
         }}
       /> */}
 
-      {/* 🟢 2. Tu Gestor de Pedidos Flotante */}
-      <FloatingOrderManager
-        isOpen={orderManagerOpen}
-        onClose={() => setOrderManagerOpen(false)}
-        initialClientData={clientDataToOrder} // Le pasamos el nombre y teléfono autocompletados
-        restaurantId={restaurantId}
-      />
-      {/* <WhatsAppFloatingWidget restaurantId={restaurantId} /> */}
-    </div>
+        {/* 🟢 2. Tu Gestor de Pedidos Flotante */}
+        <FloatingOrderManager
+          isOpen={orderManagerOpen}
+          onClose={() => setOrderManagerOpen(false)}
+          initialClientData={clientDataToOrder} // Le pasamos el nombre y teléfono autocompletados
+          restaurantId={restaurantId}
+        />
+        {/* <WhatsAppFloatingWidget restaurantId={restaurantId} /> */}
+      </div>
+    </SelectedRestaurantProvider>
   );
 }

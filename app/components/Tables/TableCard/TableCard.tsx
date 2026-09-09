@@ -1,5 +1,6 @@
 import { ActiveOrder, Table } from "@/app/admin/tables/types";
 import { Pencil, Trash2, Utensils } from "lucide-react";
+import { RoleGuard } from "../../Auth/RoleGuard/RoleGuard";
 
 interface TableCardProps {
   table: Table;
@@ -103,22 +104,24 @@ export function TableCard({
           {isOccupied ? "Ver Cuenta / Cobrar +" : "Abrir Comanda +"}
         </span>
 
-        <div
-          className="flex items-center gap-1"
-          onClick={(e) => e.stopPropagation()}>
-          <button
-            onClick={() => onEdit(table)}
-            className="p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl transition-colors cursor-pointer"
-            title="Editar número">
-            <Pencil className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => onDelete(table.id)}
-            className="p-2 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-xl transition-colors cursor-pointer"
-            title="Eliminar mesa">
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        <RoleGuard allowedRoles={["owner"]} isPage={false}>
+          <div
+            className="flex items-center gap-1"
+            onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => onEdit(table)}
+              className="p-2 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl transition-colors cursor-pointer"
+              title="Editar número">
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => onDelete(table.id)}
+              className="p-2 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-xl transition-colors cursor-pointer"
+              title="Eliminar mesa">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </RoleGuard>
       </div>
     </div>
   );

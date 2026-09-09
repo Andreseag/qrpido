@@ -5,15 +5,21 @@ import { AppRole, useUserRole } from "@/app/hooks/useUserRole";
 
 interface RoleGuardProps {
   allowedRoles: AppRole[];
+  isPage?: boolean;
   children: React.ReactNode;
 }
 
-export function RoleGuard({ allowedRoles, children }: RoleGuardProps) {
+export function RoleGuard({
+  allowedRoles,
+  isPage = true,
+  children,
+}: RoleGuardProps) {
   const { role, loading } = useUserRole();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading) {
+      console.log("RoleGuard: role =", role, "allowedRoles =", allowedRoles);
       if (!role) {
         // Si no tiene rol o no está logueado, al login
         router.push("/login");
@@ -29,7 +35,7 @@ export function RoleGuard({ allowedRoles, children }: RoleGuardProps) {
     }
   }, [role, loading, allowedRoles, router]);
 
-  if (loading) {
+  if (loading && isPage) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
         <div className="w-10 h-10 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-4"></div>

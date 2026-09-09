@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 import { Member, FeedbackMessage, CreateUserPayload } from "../types";
+import { useSelectedRestaurant } from "@/app/context/Selectedrestaurantcontext";
 
 export interface RestaurantContext {
   id: number;
@@ -24,6 +25,9 @@ export function useAdminSettings() {
   const [message, setMessage] = useState<FeedbackMessage | null>(null);
 
   const router = useRouter();
+
+  // Selección persistida globalmente (Context + localStorage)
+  const { selectedRestaurantId } = useSelectedRestaurant();
 
   const fetchMembers = useCallback(async (restId: number) => {
     const { data: teamData, error: teamError } = await supabase
@@ -80,14 +84,22 @@ export function useAdminSettings() {
         }));
 
       setRestaurants(mappedRestaurants);
+    };
 
-      // Determinar la sucursal activa (vía localStorage o la primera por defecto)
-      const savedId = localStorage.getItem("active_restaurant_id");
-      const foundActive = mappedRestaurants.find(
-        (r) => r.id.toString() === savedId,
-      );
+    initSettings();
+  }, [router]);
 
-      const activeRest = foundActive || mappedRestaurants[0];
+  // 2. Sincronizar sucursal activa con selectedRestaurantId del contexto global y activar el cargador
+  useEffect(() => {
+    if (restaurants.length === 0) return;
+
+    const syncRestaurant = async () => {
+      setLoading(true);
+
+      const activeRest =
+        restaurants.find(
+          (r) => r.id.toString() === selectedRestaurantId?.toString(),
+        ) || restaurants[0];
 
       setRestaurantId(activeRest.id);
       setRestaurantName(activeRest.name);
@@ -98,28 +110,29 @@ export function useAdminSettings() {
       setLoading(false);
     };
 
-    initSettings();
-  }, [router, fetchMembers]);
+    syncRestaurant();
+  }, [selectedRestaurantId, restaurants, fetchMembers]);
 
-  // 2. Cambiar de sucursal activa desde el selector
+  // 3. Cambiar de sucursal activa desde el selector
   const changeActiveRestaurant = useCallback(
     async (newId: number) => {
       const selected = restaurants.find((r) => r.id === newId);
       if (!selected) return;
 
+      setLoading(true);
       setRestaurantId(selected.id);
       setRestaurantName(selected.name);
       setIsOwner(selected.role === "owner");
       localStorage.setItem("active_restaurant_id", selected.id.toString());
+      window.dispatchEvent(new Event("storage"));
 
-      setLoading(true);
       await fetchMembers(selected.id);
       setLoading(false);
     },
     [restaurants, fetchMembers],
   );
 
-  // 3. Actualizar nombre del restaurante activo
+  // 4. Actualizar nombre del restaurante activo
   const updateRestaurantName = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -154,7 +167,7 @@ export function useAdminSettings() {
     [restaurantId, restaurantName],
   );
 
-  // 4. Cambiar rol de un miembro
+  // 5. Cambiar rol de un miembro
   const changeMemberRole = useCallback(
     async (userId: string, newRole: string) => {
       if (!restaurantId) return;
@@ -182,7 +195,7 @@ export function useAdminSettings() {
     [restaurantId],
   );
 
-  // 5. Quitar miembro del restaurante
+  // 6. Quitar miembro del restaurante
   const removeMember = useCallback(
     async (userId: string) => {
       if (!confirm("¿Estás seguro de quitar a este usuario del restaurante?"))
@@ -205,7 +218,7 @@ export function useAdminSettings() {
     [restaurantId],
   );
 
-  // 6. Crear nuevo usuario y asignarlo a la sucursal activa
+  // 7. Crear nuevo usuario y asignarlo a la sucursal activa
   const createUser = useCallback(
     async (payload: CreateUserPayload) => {
       if (!restaurantId) return false;

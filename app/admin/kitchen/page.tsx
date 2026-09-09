@@ -1,6 +1,4 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
   Clock,
   CheckCircle2,
@@ -15,162 +13,12 @@ import {
   CreditCard,
   Banknote,
 } from "lucide-react";
-import { supabase } from "../../lib/supabase";
 import { RoleGuard } from "@/app/components/Auth/RoleGuard/RoleGuard";
-
-interface OrderItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
-interface Order {
-  id: number;
-  created_at: string;
-  items: OrderItem[];
-  state: "pendiente" | "preparando" | "listo" | "entregado";
-  order_type?: "mesa" | "llevar" | "domicilio" | string;
-  table_id?: number | null;
-  table_number?: string | null;
-  address?: string | null;
-  payment_method?: string | null;
-  cash_given?: number | null;
-  restaurant_id: number;
-  total_price: number;
-  note?: string | null;
-}
+import { useKitchenOrders } from "./hooks/useKitchenOrders";
+import { getElapsedTime } from "../delivery/utils";
 
 export default function KitchenPage() {
-  const [user, setUser] = useState<any>(null);
-  const [restaurantId, setRestaurantId] = useState<string | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [configError, setConfigError] = useState<string | null>(null);
-  const router = useRouter();
-
-  // 1. Validar sesión y obtener el ID del restaurante activo con soporte para múltiples sucursales
-  useEffect(() => {
-    const initKitchen = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (!session) {
-        router.push("/login");
-        return;
-      }
-      setUser(session.user);
-
-      const { data: membersData, error } = await supabase
-        .from("restaurant_members")
-        .select("restaurant_id")
-        .eq("user_id", session.user.id);
-
-      if (error || !membersData || membersData.length === 0) {
-        setConfigError(
-          "No se encontró un restaurante asociado a este usuario.",
-        );
-        setLoading(false);
-        return;
-      }
-
-      const savedRestId = localStorage.getItem("active_restaurant_id");
-      let activeId: string | null = savedRestId ? savedRestId : null;
-
-      const isValidActive = membersData.some(
-        (m: any) => m.restaurant_id.toString() === activeId,
-      );
-
-      if (!isValidActive) {
-        const fallbackId = membersData[0].restaurant_id.toString();
-        activeId = fallbackId;
-        localStorage.setItem("active_restaurant_id", fallbackId);
-      }
-
-      setRestaurantId(activeId);
-    };
-
-    initKitchen();
-  }, [router]);
-
-  // 2. Cargar órdenes y activar Supabase Realtime
-  useEffect(() => {
-    if (!restaurantId) return;
-
-    const fetchOrders = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("restaurant_id", restaurantId)
-        .in("state", ["pendiente", "preparando"])
-        .order("created_at", { ascending: true })
-        .limit(100);
-      if (error) {
-        console.error("Error al cargar órdenes:", error);
-      } else if (data) {
-        setOrders(data as Order[]);
-      }
-      setLoading(false);
-    };
-
-    fetchOrders();
-
-    const channel = supabase
-      .channel(`kitchen-channel-${restaurantId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "orders",
-          filter: `restaurant_id=eq.${restaurantId}`,
-        },
-        (payload: any) => {
-          if (payload.eventType === "INSERT") {
-            setOrders((prev) => [...prev, payload.new as Order]);
-          } else if (payload.eventType === "UPDATE") {
-            setOrders((prev) => {
-              const updated = payload.new as Order;
-              if (["listo", "entregado"].includes(updated.state)) {
-                return prev.filter((o) => o.id !== updated.id);
-              }
-              return prev.map((o) => (o.id === updated.id ? updated : o));
-            });
-          }
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [restaurantId]);
-
-  // 3. Cambiar estado del pedido
-  const updateOrderState = async (
-    orderId: number,
-    newState: "preparando" | "listo",
-  ) => {
-    const { error } = await supabase
-      .from("orders")
-      .update({ state: newState })
-      .eq("id", orderId);
-
-    if (error) {
-      console.error("Error al actualizar estado:", error);
-    } else {
-      setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, state: newState } : o)),
-      );
-    }
-  };
-
-  const getElapsedTime = (createdAt: string) => {
-    return Math.floor(
-      (new Date().getTime() - new Date(createdAt).getTime()) / 60000,
-    );
-  };
+  const { orders, loading, configError, updateOrderState } = useKitchenOrders();
 
   if (configError) {
     return (

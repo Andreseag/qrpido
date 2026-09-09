@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import {
   Search,
   Users,
@@ -8,74 +7,20 @@ import {
   ArrowRight,
   UserCheck,
   RefreshCw,
-  ChefHat,
 } from "lucide-react";
-import { supabase } from "@/app/lib/supabase";
 import CustomerDetailModal from "@/app/components/CustomerDetailModal/CustomerDetailModal";
-
-interface Customer {
-  id: string;
-  name: string;
-  phone: string;
-  notes: string;
-  created_at: string;
-}
+import { useClients } from "./hooks/useClients";
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-    null,
-  );
-  const [restaurantId, setRestaurantId] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const fetchCustomers = async () => {
-    setLoading(true);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      setLoading(false);
-      return;
-    }
-
-    const { data: member } = await supabase
-      .from("restaurant_members")
-      .select("restaurant_id")
-      .eq("user_id", session.user.id)
-      .maybeSingle();
-
-    if (!member) {
-      setLoading(false);
-      return;
-    }
-
-    const restaurantId = member.restaurant_id;
-    setRestaurantId(restaurantId);
-
-    const { data, error } = await supabase
-      .from("customers")
-      .select("*")
-      .eq("restaurant_id", restaurantId)
-      .order("created_at", { ascending: false });
-
-    if (data) {
-      setCustomers(data);
-    }
-    setLoading(false);
-  };
-
-  const filteredCustomers = customers.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.phone.includes(searchTerm),
-  );
+  const {
+    loading,
+    searchTerm,
+    setSearchTerm,
+    selectedCustomer,
+    setSelectedCustomer,
+    restaurantId,
+    filteredCustomers,
+  } = useClients();
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex">

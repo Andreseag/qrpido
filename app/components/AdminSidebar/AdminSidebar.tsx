@@ -14,6 +14,7 @@ import {
   Bike,
   UserCheck,
   Settings,
+  Wallet,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
@@ -115,6 +116,12 @@ export default function AdminSidebar() {
       roles: ["owner", "cashier"],
     },
     {
+      name: "Gastos e Insumos",
+      href: "/admin/expenses",
+      icon: Wallet,
+      roles: ["owner"],
+    },
+    {
       name: "Clientes",
       href: "/admin/clientes",
       icon: Users,
@@ -126,6 +133,7 @@ export default function AdminSidebar() {
       icon: MessageCircle,
       roles: ["owner"],
     },
+
     {
       name: "Configuración",
       href: "/admin/settings",

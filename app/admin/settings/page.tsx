@@ -38,19 +38,19 @@ export default function AdminSettingsPage() {
       <div className="min-h-screen bg-background text-foreground flex relative">
         <main className="flex-1 p-6 md:p-10 overflow-y-auto">
           {/* Header */}
-          <header className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
+          <header className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border pb-6 mb-8 gap-4">
             <div className="flex items-center gap-3">
-              <div className="bg-amber-500/15 p-3 rounded-2xl border border-amber-500/30">
-                <Settings className="text-amber-400 w-8 h-8" />
+              <div className="bg-primary/15 p-3 rounded-2xl border border-primary/30">
+                <Settings className="text-primary w-8 h-8" />
               </div>
               <div>
-                <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                <h1 className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2">
                   Configuración del Local{" "}
-                  <span className="text-amber-400 font-medium text-xs px-2.5 py-0.5 bg-amber-500/10 rounded-full border border-amber-500/20">
+                  <span className="text-primary font-medium text-xs px-2.5 py-0.5 bg-primary/10 rounded-full border border-primary/20">
                     Admin Panel
                   </span>
                 </h1>
-                <p className="text-xs text-slate-400 font-medium">
+                <p className="text-xs text-muted-foreground font-medium">
                   Administra la información general y los accesos de tu equipo
                 </p>
               </div>
@@ -59,8 +59,8 @@ export default function AdminSettingsPage() {
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-32">
-              <RefreshCw className="w-10 h-10 text-amber-500 animate-spin mb-4" />
-              <p className="text-xs font-black uppercase tracking-widest text-slate-500">
+              <RefreshCw className="w-10 h-10 text-primary animate-spin mb-4" />
+              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
                 Cargando ajustes...
               </p>
             </div>

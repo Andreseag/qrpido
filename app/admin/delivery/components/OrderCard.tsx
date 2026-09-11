@@ -39,7 +39,7 @@ export function OrderCard({ order, onUpdateState }: OrderCardProps) {
       }`}>
       {/* Indicador de tiempo y tipo */}
       <div className="flex items-center justify-between mb-2 pb-2 border-b border-border">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 bg-purple-500/15 text-purple-300 border border-purple-500/30">
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 bg-purple-500/15 text-purple-500 border border-purple-500/30">
           <MapPin className="w-3 h-3" /> Domicilio
         </span>
 
@@ -139,7 +139,7 @@ export function OrderCard({ order, onUpdateState }: OrderCardProps) {
         {order.state === "en_cocina" && (
           <button
             onClick={() => onUpdateState(order.id, "listo")}
-            className="w-full bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer">
+            className="w-full bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-500 border border-indigo-500/30 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer">
             <CheckCircle2 className="w-3 h-3" /> Marcar Listo
           </button>
         )}

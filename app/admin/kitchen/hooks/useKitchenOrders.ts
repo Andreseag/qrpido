@@ -16,7 +16,7 @@ interface Order {
   id: number;
   created_at: string;
   items: OrderItem[];
-  state: "pendiente" | "preparando" | "listo" | "entregado";
+  state: "en_cocina" | "preparando" | "listo" | "entregado" | "pendiente";
   order_type?: "mesa" | "llevar" | "domicilio" | string;
   table_id?: number | null;
   table_number?: string | null;
@@ -67,7 +67,7 @@ export function useKitchenOrders() {
         .from("orders")
         .select("*")
         .eq("restaurant_id", selectedRestaurantId)
-        .in("state", ["pendiente", "preparando"])
+        .in("state", ["en_cocina", "preparando"])
         .order("created_at", { ascending: true })
         .limit(100);
 

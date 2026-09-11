@@ -28,9 +28,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(var(--primary-rgb),0.15),rgba(255,255,255,0))] p-4">
-      {/* Tarjeta de Login con diseño profesional adaptativo */}
-      <div className="w-full max-w-md bg-surface/80 backdrop-blur-2xl p-8 rounded-3xl shadow-2xl border border-border">
+    <div
+      className="min-h-screen flex items-center justify-center bg-background p-4"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse 80% 80% at 50% -20%, color-mix(in srgb, var(--primary) 15%, transparent), rgba(255,255,255,0))",
+      }}>
+      {/* Tarjeta de Login con diseño profesional dark/amber */}
+      <div className="w-full max-w-md bg-surface/60 backdrop-blur-2xl p-8 rounded-3xl shadow-2xl border border-border/80">
         {/* Logo y Encabezado */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 border border-primary/20 rounded-2xl mb-4 shadow-lg shadow-primary/10">
@@ -58,7 +63,7 @@ export default function LoginPage() {
                 placeholder="nombre@restaurante.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-3.5 bg-background border border-border rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs text-foreground font-medium placeholder:text-muted-foreground/60"
+                className="w-full pl-11 pr-4 py-3.5 bg-background/80 border border-border/80 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs text-foreground font-medium placeholder:text-muted-foreground"
               />
             </div>
           </div>
@@ -76,7 +81,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-11 pr-4 py-3.5 bg-background border border-border rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs text-foreground font-medium placeholder:text-muted-foreground/60"
+                className="w-full pl-11 pr-4 py-3.5 bg-background/80 border border-border/80 rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-xs text-foreground font-medium placeholder:text-muted-foreground"
               />
             </div>
           </div>

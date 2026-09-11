@@ -8,6 +8,7 @@ export interface OrderItem {
 export type OrderState =
   | "pendiente"
   | "en_cocina"
+  | "preparando"
   | "listo"
   | "en_camino"
   | "entregado"
@@ -18,7 +19,7 @@ export interface Order {
   created_at: string;
   items: OrderItem[];
   state: OrderState;
-  order_type?: "mesa" | "llevar" | "domicilio" | string;
+  order_type?: "mesa" | "llevar" | "domicilio" | "preparando" | string;
   table_number?: string | null;
   customer_name?: string | null;
   customer_phone?: string | null;
@@ -38,14 +39,14 @@ export interface KanbanColumnDef {
 
 export const COLUMNS: KanbanColumnDef[] = [
   {
-    id: "pendiente",
-    title: "Pendientes",
-    headerBg: "bg-amber-500/10 border-amber-500/30 text-amber-400",
-  },
-  {
     id: "en_cocina",
     title: "En Cocina",
     headerBg: "bg-sky-500/10 border-sky-500/30 text-sky-400",
+  },
+  {
+    id: "preparando",
+    title: "En Cocina",
+    headerBg: "bg-amber-500/10 border-amber-500/30 text-amber-400",
   },
   {
     id: "listo",

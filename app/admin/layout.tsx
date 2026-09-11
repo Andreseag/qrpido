@@ -71,7 +71,6 @@ export default function AdminLayout({
           isOpen={orderManagerOpen}
           onClose={() => setOrderManagerOpen(false)}
           initialClientData={clientDataToOrder} // Le pasamos el nombre y teléfono autocompletados
-          restaurantId={restaurantId}
         />
         {/* <WhatsAppFloatingWidget restaurantId={restaurantId} /> */}
       </div>

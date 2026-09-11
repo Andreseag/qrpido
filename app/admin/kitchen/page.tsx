@@ -36,7 +36,7 @@ export default function KitchenPage() {
 
   return (
     <RoleGuard allowedRoles={["owner", "chef"]}>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+      <div className="min-h-screen bg-background text-foreground flex">
         <main className="flex-1 p-6 md:p-10 overflow-y-auto">
           {/* Header */}
           <header className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-slate-800 pb-6 mb-8 gap-4">

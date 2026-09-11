@@ -12,7 +12,7 @@ export default function RestaurantSelector({
   onSelect,
 }: RestaurantSelectorProps) {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
       <div className="max-w-lg w-full">
         <div className="text-center mb-8">
           <div className="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 inline-flex mb-4">

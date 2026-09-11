@@ -108,16 +108,16 @@ export default function AdminTablesPage() {
       <Toast toast={toast} />
 
       {/* Header Principal */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
+      <header className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-6 mb-8 gap-4">
         <div className="flex items-center gap-3">
-          <div className="bg-amber-500/10 p-3 rounded-2xl border border-amber-500/20">
-            <LayoutGrid className="text-amber-400 w-8 h-8" />
+          <div className="bg-primary/10 p-3 rounded-2xl border border-primary/25">
+            <LayoutGrid className="text-primary w-8 h-8" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-white">
+            <h1 className="text-2xl font-black tracking-tight text-foreground">
               Salón y Gestión de Mesas (Rondas & POS)
             </h1>
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs text-muted-foreground font-medium">
               Controla cuentas abiertas, rondas a cocina y pagos profesionales
               en tiempo real
             </p>
@@ -127,7 +127,7 @@ export default function AdminTablesPage() {
         <RoleGuard allowedRoles={["owner"]} isPage={false}>
           <button
             onClick={handleOpenCreateTable}
-            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-3.5 rounded-2xl flex items-center gap-2 transition-all cursor-pointer text-xs uppercase tracking-wider shadow-lg shadow-amber-500/10 self-start md:self-auto">
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-black px-6 py-3.5 rounded-2xl flex items-center gap-2 transition-all cursor-pointer text-xs uppercase tracking-wider shadow-lg shadow-primary/10 self-start md:self-auto">
             <Plus className="w-4 h-4" /> Nueva Mesa
           </button>
         </RoleGuard>
@@ -136,23 +136,23 @@ export default function AdminTablesPage() {
       {/* Grid de Mesas */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-32">
-          <div className="w-10 h-10 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-4"></div>
-          <p className="text-amber-400 font-black tracking-widest uppercase text-xs">
+          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+          <p className="text-primary font-black tracking-widest uppercase text-xs">
             Cargando salón...
           </p>
         </div>
       ) : tables.length === 0 ? (
-        <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-16 text-center">
-          <LayoutGrid className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-white font-bold text-sm mb-1">
+        <div className="bg-surface/50 border border-border rounded-3xl p-16 text-center shadow-sm">
+          <LayoutGrid className="w-12 h-12 text-muted-foreground/60 mx-auto mb-4" />
+          <h3 className="text-foreground font-bold text-sm mb-1">
             No hay mesas configuradas
           </h3>
-          <p className="text-xs text-slate-500 mb-6">
+          <p className="text-xs text-muted-foreground mb-6">
             Crea tus mesas para habilitar el salón.
           </p>
           <button
             onClick={handleOpenCreateTable}
-            className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider inline-flex items-center gap-2">
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-black px-6 py-3 rounded-2xl text-xs uppercase tracking-wider inline-flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-primary/10">
             <Plus className="w-4 h-4" /> Crear Primera Mesa
           </button>
         </div>

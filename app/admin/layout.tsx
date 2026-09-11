@@ -49,7 +49,7 @@ export default function AdminLayout({
 
   return (
     <SelectedRestaurantProvider>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+      <div className="min-h-screen bg-background text-foreground flex">
         {/* El Sidebar permanece fijo en todo el sistema admin */}
         <AdminSidebar />
 

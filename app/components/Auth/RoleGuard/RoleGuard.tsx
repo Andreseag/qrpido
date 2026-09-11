@@ -37,9 +37,9 @@ export function RoleGuard({
 
   if (loading && isPage) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
-        <div className="w-10 h-10 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-4"></div>
-        <p className="text-amber-400 font-black tracking-widest uppercase text-xs">
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+        <p className="text-primary font-black tracking-widest uppercase text-xs">
           Verificando credenciales y permisos...
         </p>
       </div>

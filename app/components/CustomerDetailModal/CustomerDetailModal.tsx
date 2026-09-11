@@ -133,80 +133,84 @@ export default function CustomerDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-surface border border-border rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="bg-background px-6 py-4 border-b border-border flex items-center justify-between">
           <div>
-            <h3 className="text-white font-black text-base">{customer.name}</h3>
-            <p className="text-xs text-slate-400 font-medium">
+            <h3 className="text-foreground font-black text-base">
+              {customer.name}
+            </h3>
+            <p className="text-xs text-muted-foreground font-medium">
               WhatsApp: {customer.phone}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer">
+            className="p-2 hover:bg-surface rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-6 overflow-y-auto space-y-6 flex-1 text-xs">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
-              <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-                <ShoppingBag className="w-3.5 h-3.5 text-amber-400" />
+            <div className="bg-background/60 p-3 rounded-2xl border border-border">
+              <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                <ShoppingBag className="w-3.5 h-3.5 text-primary" />
                 <span className="font-bold uppercase text-[10px]">Pedidos</span>
               </div>
-              <p className="text-sm font-black text-white">{totalOrders}</p>
+              <p className="text-sm font-black text-foreground">
+                {totalOrders}
+              </p>
             </div>
 
-            <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
-              <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-                <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="bg-background/60 p-3 rounded-2xl border border-border">
+              <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                <DollarSign className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                 <span className="font-bold uppercase text-[10px]">
                   Total Gastado
                 </span>
               </div>
-              <p className="text-sm font-black text-amber-400">
+              <p className="text-sm font-black text-primary">
                 ${totalSpent.toLocaleString()}
               </p>
             </div>
 
-            <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
-              <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-                <Clock className="w-3.5 h-3.5 text-sky-400" />
+            <div className="bg-background/60 p-3 rounded-2xl border border-border">
+              <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                <Clock className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
                 <span className="font-bold uppercase text-[10px]">
                   Ticket Promedio
                 </span>
               </div>
-              <p className="text-sm font-black text-white">
+              <p className="text-sm font-black text-foreground">
                 ${Math.round(averageTicket).toLocaleString()}
               </p>
             </div>
 
-            <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
-              <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-                <Calendar className="w-3.5 h-3.5 text-purple-400" />
+            <div className="bg-background/60 p-3 rounded-2xl border border-border">
+              <div className="flex items-center gap-1.5 text-muted-foreground mb-1">
+                <Calendar className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
                 <span className="font-bold uppercase text-[10px]">
                   Última Compra
                 </span>
               </div>
-              <p className="text-xs font-black text-white truncate">
+              <p className="text-xs font-black text-foreground truncate">
                 {lastOrderDate}
               </p>
             </div>
           </div>
 
           {/* Plato Favorito & Campaña Reenganche WhatsApp */}
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="bg-amber-500 text-slate-950 p-2.5 rounded-xl font-black shrink-0">
-                <Heart className="w-5 h-5 fill-slate-950" />
+              <div className="bg-primary text-primary-foreground p-2.5 rounded-xl font-black shrink-0">
+                <Heart className="w-5 h-5 fill-primary-foreground" />
               </div>
               <div>
-                <span className="text-[10px] font-black uppercase text-amber-400 block tracking-wider">
+                <span className="text-[10px] font-black uppercase text-primary block tracking-wider">
                   Plato Favorito del Cliente
                 </span>
-                <p className="text-sm font-bold text-white mt-0.5">
+                <p className="text-sm font-bold text-foreground mt-0.5">
                   {favoriteDish}
                 </p>
               </div>
@@ -221,16 +225,16 @@ export default function CustomerDetailModal({
           </div>
 
           <div>
-            <h4 className="font-bold uppercase text-slate-400 tracking-wider mb-3">
+            <h4 className="font-bold uppercase text-muted-foreground tracking-wider mb-3">
               Historial de Pedidos ({orders.length})
             </h4>
 
             {loading ? (
-              <p className="text-center py-6 text-slate-500 italic">
+              <p className="text-center py-6 text-muted-foreground italic">
                 Cargando historial...
               </p>
             ) : orders.length === 0 ? (
-              <p className="text-center py-6 text-slate-500 italic">
+              <p className="text-center py-6 text-muted-foreground italic">
                 Este cliente aún no registra órdenes.
               </p>
             ) : (
@@ -238,20 +242,20 @@ export default function CustomerDetailModal({
                 {orders.map((order) => (
                   <div
                     key={order.id}
-                    className="bg-slate-950/50 border border-slate-800 rounded-2xl p-3.5 space-y-2">
-                    <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                    className="bg-background/50 border border-border rounded-2xl p-3.5 space-y-2">
+                    <div className="flex items-center justify-between border-b border-border/80 pb-2">
                       <div className="flex items-center gap-2">
-                        <span className="font-black text-white uppercase text-[11px]">
+                        <span className="font-black text-foreground uppercase text-[11px]">
                           {order.order_type}
                         </span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-muted-foreground">
                           {new Date(order.created_at).toLocaleString("es-CO", {
                             dateStyle: "medium",
                             timeStyle: "short",
                           })}
                         </span>
                       </div>
-                      <span className="font-black text-amber-400 text-xs">
+                      <span className="font-black text-primary text-xs">
                         ${order.total_price.toLocaleString()}
                       </span>
                     </div>
@@ -260,11 +264,14 @@ export default function CustomerDetailModal({
                       {order.items?.map((item, idx) => (
                         <div
                           key={idx}
-                          className="flex justify-between text-slate-300">
+                          className="flex justify-between text-foreground/90">
                           <span>
-                            {item.quantity}x {item.name}
+                            <strong className="text-primary font-mono">
+                              {item.quantity}x
+                            </strong>{" "}
+                            {item.name}
                           </span>
-                          <span className="text-slate-400">
+                          <span className="text-muted-foreground font-mono">
                             ${(item.price * item.quantity).toLocaleString()}
                           </span>
                         </div>

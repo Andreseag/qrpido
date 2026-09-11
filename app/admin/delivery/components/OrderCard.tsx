@@ -32,20 +32,22 @@ export function OrderCard({ order, onUpdateState }: OrderCardProps) {
 
   return (
     <div
-      className={`bg-slate-950 border rounded-xl p-3.5 shadow-lg relative transition-all ${
+      className={`bg-surface border rounded-xl p-3.5 shadow-lg relative transition-all ${
         isDelayed
-          ? "border-red-500/60 bg-red-950/10"
-          : "border-slate-800/80 hover:border-slate-700"
+          ? "border-destructive/60 bg-destructive/10"
+          : "border-border/80 hover:border-border"
       }`}>
       {/* Indicador de tiempo y tipo */}
-      <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-900">
+      <div className="flex items-center justify-between mb-2 pb-2 border-b border-border">
         <span className="text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 bg-purple-500/15 text-purple-300 border border-purple-500/30">
           <MapPin className="w-3 h-3" /> Domicilio
         </span>
 
         <div
           className={`flex items-center gap-1 text-[10px] font-mono font-bold ${
-            isDelayed ? "text-red-400 animate-pulse" : "text-slate-400"
+            isDelayed
+              ? "text-destructive animate-pulse"
+              : "text-muted-foreground"
           }`}>
           <Clock className="w-3 h-3" /> {elapsedMins} min
         </div>
@@ -53,13 +55,13 @@ export function OrderCard({ order, onUpdateState }: OrderCardProps) {
 
       {/* Datos del cliente */}
       <div className="mb-3">
-        <h3 className="font-bold text-white text-xs flex items-center gap-1">
-          <User className="w-3 h-3 text-slate-400" />{" "}
+        <h3 className="font-bold text-foreground text-xs flex items-center gap-1">
+          <User className="w-3 h-3 text-muted-foreground" />{" "}
           {order.customer_name || `Orden #${order.id}`}
         </h3>
         {order.customer_phone && (
           <div className="flex items-center justify-between mt-1">
-            <span className="text-[11px] text-slate-400 font-mono">
+            <span className="text-[11px] text-muted-foreground font-mono">
               {order.customer_phone}
             </span>
             <a
@@ -75,24 +77,24 @@ export function OrderCard({ order, onUpdateState }: OrderCardProps) {
           </div>
         )}
         {order.address && (
-          <p className="text-[11px] text-slate-300 mt-1 bg-slate-900 p-1.5 rounded-lg border border-slate-800">
+          <p className="text-[11px] text-foreground/90 mt-1 bg-background p-1.5 rounded-lg border border-border">
             📍 {order.address}
           </p>
         )}
       </div>
 
       {/* Productos del pedido */}
-      <div className="space-y-1 mb-3 bg-slate-900/40 p-2 rounded-xl border border-slate-900">
+      <div className="space-y-1 mb-3 bg-background/40 p-2 rounded-xl border border-border">
         {order.items &&
           order.items.map((item, idx) => (
             <div key={idx} className="flex justify-between text-[11px]">
-              <span className="text-slate-300">
-                <strong className="text-amber-400 font-mono">
+              <span className="text-foreground/90">
+                <strong className="text-primary font-mono">
                   {item.quantity}x
                 </strong>{" "}
                 {item.name}
               </span>
-              <span className="text-slate-400 font-mono">
+              <span className="text-muted-foreground font-mono">
                 ${(item.price * item.quantity).toLocaleString()}
               </span>
             </div>
@@ -100,31 +102,32 @@ export function OrderCard({ order, onUpdateState }: OrderCardProps) {
       </div>
 
       {/* Info de pago y total */}
-      <div className="bg-slate-900 p-2 rounded-xl border border-slate-800 mb-3 text-[11px] space-y-1">
+      <div className="bg-background p-2 rounded-xl border border-border mb-3 text-[11px] space-y-1">
         <div className="flex justify-between">
-          <span className="text-slate-400 uppercase font-bold text-[9px]">
+          <span className="text-muted-foreground uppercase font-bold text-[9px]">
             Pago: {order.payment_method || "efectivo"}
           </span>
-          <span className="font-black text-amber-400">
+          <span className="font-black text-primary">
             Total: ${order.total_price.toLocaleString()}
           </span>
         </div>
         {order.payment_method === "efectivo" && order.cash_given && (
-          <div className="flex justify-between text-emerald-400 font-bold text-[10px] pt-1 border-t border-slate-800">
+          <div className="flex justify-between text-emerald-400 font-bold text-[10px] pt-1 border-t border-border">
             <span>Paga con: ${order.cash_given.toLocaleString()}</span>
             <span>Vueltas: ${vuelto.toLocaleString()}</span>
           </div>
         )}
       </div>
 
+      {/* Nota del pedido */}
       {order.note && (
-        <p className="text-[10px] text-amber-300/90 bg-amber-500/10 border border-amber-500/20 p-1.5 rounded-lg mb-3 italic">
+        <p className="text-[10px] text-primary bg-primary/10 border border-primary/20 p-1.5 rounded-lg mb-3 italic">
           Nota: {order.note}
         </p>
       )}
 
       {/* Botones de avance de estado */}
-      <div className="flex items-center gap-1.5 pt-2 border-t border-slate-900">
+      <div className="flex items-center gap-1.5 pt-2 border-t border-border">
         {order.state === "pendiente" && (
           <button
             onClick={() => onUpdateState(order.id, "en_cocina")}
@@ -160,7 +163,7 @@ export function OrderCard({ order, onUpdateState }: OrderCardProps) {
         {order.state !== "entregado" && (
           <button
             onClick={handleCancel}
-            className="p-1.5 bg-slate-900 hover:bg-red-500/20 text-slate-500 hover:text-red-400 rounded-lg border border-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 bg-background hover:bg-destructive/20 text-muted-foreground hover:text-destructive rounded-lg border border-border transition-colors cursor-pointer"
             title="Cancelar pedido">
             <XCircle className="w-3.5 h-3.5" />
           </button>

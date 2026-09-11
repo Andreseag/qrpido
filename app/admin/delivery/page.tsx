@@ -21,8 +21,8 @@ export default function DeliveryPage() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32">
-            <RefreshCw className="w-10 h-10 text-amber-500 animate-spin mb-4" />
-            <p className="text-xs font-black uppercase tracking-widest text-slate-500">
+            <RefreshCw className="w-10 h-10 text-primary animate-spin mb-4" />
+            <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
               Cargando domicilios...
             </p>
           </div>

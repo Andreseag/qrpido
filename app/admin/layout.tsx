@@ -73,6 +73,7 @@ export default function AdminLayout({
           initialClientData={clientDataToOrder} // Le pasamos el nombre y teléfono autocompletados
         />
         {/* <WhatsAppFloatingWidget restaurantId={restaurantId} /> */}
+        {/*  */}
       </div>
     </SelectedRestaurantProvider>
   );

@@ -70,25 +70,25 @@ export function ExpenseFormDrawer({
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
-        className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
         onClick={onClose}></div>
-      <div className="relative w-full max-w-md bg-slate-900 border-l border-slate-800 h-full p-8 flex flex-col justify-between shadow-2xl overflow-y-auto">
+      <div className="relative w-full max-w-md bg-surface border-l border-border h-full p-8 flex flex-col justify-between shadow-2xl overflow-y-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex justify-between items-center border-b border-slate-800 pb-4">
-            <h2 className="text-xl font-black text-white">
+          <div className="flex justify-between items-center border-b border-border pb-4">
+            <h2 className="text-xl font-black text-foreground">
               {editingExpense ? "Editar" : "Nuevo"}{" "}
-              <span className="text-amber-400">Gasto</span>
+              <span className="text-primary">Gasto</span>
             </h2>
             <button
               type="button"
               onClick={onClose}
-              className="text-slate-400 hover:text-white cursor-pointer">
+              className="text-muted-foreground hover:text-foreground cursor-pointer">
               <X />
             </button>
           </div>
 
           <div>
-            <label className="text-xs font-bold uppercase text-slate-400 block mb-2">
+            <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
               Categoría
             </label>
             <select
@@ -99,7 +99,7 @@ export function ExpenseFormDrawer({
                   category: e.target.value as ExpenseFormValues["category"],
                 })
               }
-              className="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl text-white text-sm cursor-pointer">
+              className="w-full p-4 bg-background border border-border rounded-2xl text-foreground text-sm cursor-pointer">
               {EXPENSE_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {EXPENSE_CATEGORY_LABELS[cat]}
@@ -109,14 +109,14 @@ export function ExpenseFormDrawer({
           </div>
 
           <div>
-            <label className="text-xs font-bold uppercase text-slate-400 block mb-2">
+            <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
               Descripción
             </label>
             <input
               required
               type="text"
               placeholder="Ej: Pago arriendo local - Marzo"
-              className="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl text-white text-sm"
+              className="w-full p-4 bg-background border border-border rounded-2xl text-foreground text-sm"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
@@ -126,13 +126,13 @@ export function ExpenseFormDrawer({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold uppercase text-slate-400 block mb-2">
+              <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
                 Monto (COP)
               </label>
               <input
                 required
                 type="number"
-                className="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl text-white text-sm"
+                className="w-full p-4 bg-background border border-border rounded-2xl text-foreground text-sm"
                 value={formData.amount}
                 onChange={(e) =>
                   setFormData({ ...formData, amount: e.target.value })
@@ -140,13 +140,13 @@ export function ExpenseFormDrawer({
               />
             </div>
             <div>
-              <label className="text-xs font-bold uppercase text-slate-400 block mb-2">
+              <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
                 Fecha
               </label>
               <input
                 required
                 type="date"
-                className="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl text-white text-sm"
+                className="w-full p-4 bg-background border border-border rounded-2xl text-foreground text-sm"
                 value={formData.expense_date}
                 onChange={(e) =>
                   setFormData({ ...formData, expense_date: e.target.value })
@@ -163,20 +163,20 @@ export function ExpenseFormDrawer({
               onChange={(e) =>
                 setFormData({ ...formData, is_recurring: e.target.checked })
               }
-              className="w-4 h-4 accent-amber-500 rounded cursor-pointer"
+              className="w-4 h-4 accent-primary rounded cursor-pointer"
             />
             <label
               htmlFor="is-recurring"
-              className="text-xs font-bold uppercase text-slate-300 cursor-pointer">
+              className="text-xs font-bold uppercase text-foreground cursor-pointer">
               Es un gasto recurrente (arriendo, servicios, etc.)
             </label>
           </div>
 
           <div>
-            <label className="text-xs font-bold uppercase text-slate-400 block mb-2">
+            <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
               Comprobante (foto o PDF)
             </label>
-            <label className="w-full flex items-center gap-2 p-4 bg-slate-950 border border-dashed border-slate-700 rounded-2xl text-slate-400 text-xs cursor-pointer hover:border-amber-500 transition-colors">
+            <label className="w-full flex items-center gap-2 p-4 bg-background border border-dashed border-border rounded-2xl text-muted-foreground text-xs cursor-pointer hover:border-primary transition-colors">
               <Paperclip className="w-4 h-4 shrink-0" />
               <span className="truncate">
                 {receiptFile
@@ -197,7 +197,7 @@ export function ExpenseFormDrawer({
                 href={getReceiptUrl(editingExpense.receipt_path)}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[11px] text-amber-400 hover:underline mt-1.5 inline-block">
+                className="text-[11px] text-primary hover:underline mt-1.5 inline-block">
                 Ver comprobante actual
               </a>
             )}
@@ -206,7 +206,7 @@ export function ExpenseFormDrawer({
           <button
             type="submit"
             disabled={saving}
-            className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 py-4 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer">
+            className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground py-4 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer transition-all">
             {saving
               ? "Guardando..."
               : editingExpense

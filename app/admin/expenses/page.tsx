@@ -69,16 +69,16 @@ export default function AdminExpensesPage() {
 
   return (
     <div className="p-6 md:p-10 relative">
-      <header className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-800 pb-6 mb-8 gap-4">
+      <header className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-6 mb-8 gap-4">
         <div className="flex items-center gap-3">
-          <div className="bg-amber-500/10 p-3 rounded-2xl border border-amber-500/20">
-            <Wallet className="text-amber-400 w-8 h-8" />
+          <div className="bg-primary/10 p-3 rounded-2xl border border-primary/20">
+            <Wallet className="text-primary w-8 h-8" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-white">
+            <h1 className="text-2xl font-black tracking-tight text-foreground">
               Gastos e Insumos
             </h1>
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs text-muted-foreground font-medium">
               Arriendo, insumos, publicidad, servicios y demás gastos operativos
             </p>
           </div>
@@ -94,8 +94,8 @@ export default function AdminExpensesPage() {
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-32">
-          <RefreshCw className="w-10 h-10 text-amber-500 animate-spin mb-4" />
-          <p className="text-xs font-black uppercase tracking-widest text-slate-500">
+          <RefreshCw className="w-10 h-10 text-primary animate-spin mb-4" />
+          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">
             Cargando gastos...
           </p>
         </div>
@@ -108,7 +108,7 @@ export default function AdminExpensesPage() {
               subtitle="Suma de todas las categorías"
               icon={<Wallet className="w-7 h-7" />}
               trendIcon={<Wallet className="w-7 h-7" />}
-              iconContainerClass="bg-amber-500/10 border-amber-500/20 text-amber-400"
+              iconContainerClass="bg-primary/10 border-primary/20 text-primary"
             />
             <MetricCard
               title="Categoría con Mayor Gasto"
@@ -126,7 +126,7 @@ export default function AdminExpensesPage() {
               }
               icon={<Wallet className="w-7 h-7" />}
               trendIcon={<Wallet className="w-7 h-7" />}
-              iconContainerClass="bg-rose-500/10 border-rose-500/20 text-rose-400"
+              iconContainerClass="bg-rose-500/10 border-rose-500/20 text-rose-500 dark:text-rose-400"
             />
           </div>
 
@@ -134,7 +134,7 @@ export default function AdminExpensesPage() {
             <button
               onClick={duplicatePreviousMonth}
               disabled={duplicating}
-              className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold px-5 py-3 rounded-2xl text-xs uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50">
+              className="flex items-center gap-2 bg-surface hover:bg-surface/80 border border-border text-foreground font-bold px-5 py-3 rounded-2xl text-xs uppercase tracking-wider transition-all cursor-pointer disabled:opacity-50">
               <Copy className="w-4 h-4" />
               {duplicating
                 ? "Duplicando..."
@@ -142,7 +142,7 @@ export default function AdminExpensesPage() {
             </button>
             <button
               onClick={openCreateDrawer}
-              className="flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-6 py-3.5 rounded-2xl transition-all cursor-pointer text-xs uppercase tracking-wider shadow-lg shadow-amber-500/10">
+              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-black px-6 py-3.5 rounded-2xl transition-all cursor-pointer text-xs uppercase tracking-wider shadow-lg shadow-primary/10">
               <Plus className="w-4 h-4" /> Nuevo Gasto
             </button>
           </div>

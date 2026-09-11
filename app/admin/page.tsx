@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
 
   return (
     <RoleGuard allowedRoles={["owner"]}>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+      <div className="min-h-screen bg-background text-foreground flex">
         <main className="flex-1 p-6 md:p-10 overflow-y-auto">
           <DashboardHeader
             restaurantName={restaurantName}
@@ -64,15 +64,15 @@ export default function AdminDashboardPage() {
           {restaurants.length > 1 && (
             <button
               onClick={changeRestaurant}
-              className="mb-8 -mt-3 flex items-center gap-1.5 text-[11px] font-bold text-amber-400 hover:text-amber-300 transition-colors cursor-pointer">
+              className="mb-8 -mt-3 flex items-center gap-1.5 text-[11px] font-bold text-primary hover:text-primary/80 transition-colors cursor-pointer">
               <Store className="w-3.5 h-3.5" /> Cambiar restaurante
             </button>
           )}
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-32">
-              <div className="w-10 h-10 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mb-4"></div>
-              <p className="text-amber-400 font-black tracking-widest uppercase text-xs">
+              <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+              <p className="text-primary font-black tracking-widest uppercase text-xs">
                 Cargando métricas financieras...
               </p>
             </div>
@@ -93,8 +93,8 @@ export default function AdminDashboardPage() {
                   subtitle="Ingresos del período"
                   icon={<DollarSign className="w-7 h-7" />}
                   trendIcon={<TrendingUp size={14} />}
-                  trendColorClass="text-emerald-400"
-                  iconContainerClass="bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                  trendColorClass="text-success"
+                  iconContainerClass="bg-success/10 border-success/20 text-success"
                 />
 
                 <MetricCard
@@ -103,8 +103,8 @@ export default function AdminDashboardPage() {
                   subtitle="Órdenes en el período"
                   icon={<ReceiptText className="w-7 h-7" />}
                   trendIcon={<ShoppingBag size={14} />}
-                  trendColorClass="text-amber-400"
-                  iconContainerClass="bg-amber-500/10 border-amber-500/20 text-amber-400"
+                  trendColorClass="text-primary"
+                  iconContainerClass="bg-primary/10 border-primary/20 text-primary"
                 />
 
                 <MetricCard
@@ -113,8 +113,8 @@ export default function AdminDashboardPage() {
                   subtitle="Por orden de compra"
                   icon={<DollarSign className="w-7 h-7" />}
                   trendIcon={<TrendingUp size={14} />}
-                  trendColorClass="text-blue-400"
-                  iconContainerClass="bg-blue-500/10 border-blue-500/20 text-blue-400"
+                  trendColorClass="text-info"
+                  iconContainerClass="bg-info/10 border-info/20 text-info"
                 />
 
                 <MetricCard
@@ -123,9 +123,9 @@ export default function AdminDashboardPage() {
                   subtitle="Ganancia neta estimada"
                   icon={<DollarSign className="w-7 h-7" />}
                   trendIcon={<TrendingUp size={14} />}
-                  trendColorClass="text-emerald-400"
-                  valueColorClass="text-emerald-400"
-                  iconContainerClass="bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                  trendColorClass="text-success"
+                  valueColorClass="text-success"
+                  iconContainerClass="bg-success/10 border-success/20 text-success"
                 />
               </div>
 

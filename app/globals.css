@@ -1,76 +1,105 @@
 @import "tailwindcss";
 
-:root {
-  /* Paleta Base - Limpia y Moderna */
-  --background: #ffffff;
-  --foreground: #0f172a; /* Un azul casi negro para mejor lectura */
+/*
+ * ============================================================
+ * AGREGAR ESTO a tu app/globals.css existente, DESPUÉS de tu
+ * `@import "tailwindcss";` — no reemplaces el archivo completo,
+ * solo mergea estos bloques con lo que ya tienes.
+ * ============================================================
+ */
 
-  /* Identidad QRPido */
-  --qrpido-blue: #0052ff;
-  --qrpido-blue-soft: rgba(0, 82, 255, 0.1);
+/* Habilita el prefijo dark: basado en una clase .dark en <html>,
+   en vez de solo la media query prefers-color-scheme. Esto es lo
+   que permite que next-themes controle el tema manualmente. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  /* Estados */
-  --success: #10b981;
-  --error: #ef4444;
-}
-
-@theme inline {
+/*
+ * @theme registra cada variable como un TOKEN DE DISEÑO: Tailwind
+ * genera automáticamente las utilidades bg-*, text-*, border-*
+ * para cada una (bg-background, text-foreground, border-border...).
+ * El valor real de cada token vive en :root / .dark más abajo —
+ * @theme solo declara que el token existe y qué clases genera.
+ */
+@theme {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
-  --color-qrpido-blue: var(--qrpido-blue);
-  --color-qrpido-soft: var(--qrpido-blue-soft);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #020617; /* Fondo marino profundo */
-    --foreground: #f8fafc;
-    --qrpido-blue-soft: rgba(0, 82, 255, 0.2);
-  }
+/* Valores para modo claro (por defecto) */
+:root {
+  color-scheme: light;
+
+  /* Duración de la transición al cambiar de tema — un solo lugar
+     para ajustarla, igual que el resto de tus tokens de diseño. */
+  --theme-transition-duration: 300ms;
+
+  --background: #ffffff;
+  --surface: #f8fafc; /* equivalente claro de tu slate-900 (tarjetas) */
+  --surface-muted: #f1f5f9; /* equivalente claro de slate-950/60 */
+  --border: #e2e8f0;
+  --foreground: #0f172a;
+  --muted-foreground: #64748b;
+
+  --primary: #f59e0b; /* tu amber-500 actual */
+  --primary-foreground: #020617;
+
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #0284c7;
 }
 
-/* 🧬 Estilos Base Reiniciados */
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease;
+/* Valores para modo oscuro — calcados de la paleta que ya usas
+   (slate-950/900/800, amber-500, emerald/red/sky-400) */
+.dark {
+  color-scheme: dark;
+
+  --background: #020617; /* slate-950 */
+  --surface: #0f172a; /* slate-900 */
+  --surface-muted: rgba(2, 6, 23, 0.6); /* slate-950/60 */
+  --border: #1e293b; /* slate-800 */
+  --foreground: #f1f5f9;
+  --muted-foreground: #94a3b8;
+
+  --primary: #f59e0b; /* amber-500 — igual en ambos temas, es tu marca */
+  --primary-foreground: #020617;
+
+  --success: #34d399; /* emerald-400 */
+  --warning: #fbbf24; /* amber-400 */
+  --danger: #f87171; /* red-400 */
+  --info: #38bdf8; /* sky-400 */
 }
 
-/* ✨ Utilidades de QRPido */
-@layer components {
-  /* El botón "Ferrari" que usaremos en toda la app */
-  .btn-primary {
-    @apply bg-qrpido-blue text-white px-6 py-3 rounded-xl font-bold 
-           transition-all hover:scale-[1.02] active:scale-95 
-           shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2;
+/*
+ * Transición suave al cambiar entre claro/oscuro.
+ *
+ * Solo transiciona color/fondo/borde (NUNCA `all`) para no interferir
+ * con transform, box-shadow u otras animaciones que ya tengan tus
+ * componentes. Un selector universal (*) siempre pierde en
+ * especificidad contra una clase de Tailwind como .transition-all,
+ * así que esto no pisa nada que ya tengas.
+ *
+ * Envuelto en prefers-reduced-motion: quien configuró su sistema
+ * para reducir animaciones no debería ver esta transición.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  *,
+  *::before,
+  *::after {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-timing-function: ease;
+    transition-duration: var(--theme-transition-duration);
   }
-
-  /* El switch de inventario que querías */
-  .status-badge {
-    @apply px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider;
-  }
-}
-
-/* 🌀 Animación de Carga Firma de la Marca */
-@keyframes qrpido-pulse {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(0.95);
-    opacity: 0.5;
-  }
-}
-
-.animate-qrpido {
-  animation: qrpido-pulse 2s infinite ease-in-out;
 }

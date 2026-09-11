@@ -17,14 +17,14 @@ export default function MetricCard({
   subtitle,
   icon,
   trendIcon,
-  trendColorClass = "text-emerald-400",
-  valueColorClass = "text-white",
-  iconContainerClass = "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+  trendColorClass = "text-emerald-500 dark:text-emerald-400",
+  valueColorClass = "text-foreground",
+  iconContainerClass = "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400",
 }: MetricCardProps) {
   return (
-    <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl flex items-center justify-between">
+    <div className="bg-surface/90 p-6 rounded-3xl border border-border shadow-xl flex items-center justify-between">
       <div>
-        <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+        <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
           {title}
         </p>
         <p className={`text-3xl font-black ${valueColorClass}`}>{value}</p>

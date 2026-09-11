@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
 import { AppRole, useUserRole } from "@/app/hooks/useUserRole";
 import RestaurantSwitcher from "../RestaurantSwitcher/RestaurantSwitcher";
+import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 
 interface NavItem {
   name: string;
@@ -133,7 +134,6 @@ export default function AdminSidebar() {
       icon: MessageCircle,
       roles: ["owner"],
     },
-
     {
       name: "Configuración",
       href: "/admin/settings",
@@ -150,18 +150,18 @@ export default function AdminSidebar() {
   const translatedRole = role ? roleTranslations[role] || role : "";
 
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between hidden md:flex shrink-0 min-h-screen">
+    <aside className="w-64 bg-surface border-r border-border flex flex-col justify-between hidden md:flex shrink-0 min-h-screen">
       <div>
         {/* Logo / Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-          <div className="bg-amber-500 p-2.5 rounded-2xl text-slate-950 font-black">
+        <div className="p-6 border-b border-border flex items-center gap-3">
+          <div className="bg-primary p-2.5 rounded-2xl text-primary-foreground font-black">
             <Store className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="font-black text-lg text-white tracking-tight">
+            <h1 className="font-black text-lg text-foreground tracking-tight">
               QRPido
             </h1>
-            <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-primary uppercase tracking-widest">
               {loading ? "Cargando rol..." : `Rol: ${translatedRole}`}
             </p>
           </div>
@@ -171,16 +171,16 @@ export default function AdminSidebar() {
         <RestaurantSwitcher userId={userId} />
 
         {/* Info del Usuario Logueado (Perfil) */}
-        <div className="px-6 py-4 border-b border-slate-800/60 bg-slate-950/30 flex items-center gap-3">
-          <div className="bg-slate-800 p-2 rounded-xl text-slate-300">
-            <UserCheck className="w-4 h-4 text-amber-400" />
+        <div className="px-6 py-4 border-b border-border/60 bg-background/30 flex items-center gap-3">
+          <div className="bg-border p-2 rounded-xl text-muted-foreground">
+            <UserCheck className="w-4 h-4 text-primary" />
           </div>
           <div className="overflow-hidden">
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Conectado como
             </p>
             <p
-              className="text-sm font-bold text-white truncate"
+              className="text-sm font-bold text-foreground truncate"
               title={userName}>
               {userName || "Cargando..."}
             </p>
@@ -194,7 +194,7 @@ export default function AdminSidebar() {
               {[1, 2, 3].map((n) => (
                 <div
                   key={n}
-                  className="h-11 bg-slate-800/40 rounded-2xl animate-pulse"
+                  className="h-11 bg-border/40 rounded-2xl animate-pulse"
                 />
               ))}
             </div>
@@ -208,8 +208,8 @@ export default function AdminSidebar() {
                   href={item.href}
                   className={`flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all ${
                     isActive
-                      ? "bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/10"
-                      : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-border/60"
                   }`}>
                   <Icon size={20} />
                   <span>{item.name}</span>
@@ -220,11 +220,19 @@ export default function AdminSidebar() {
         </nav>
       </div>
 
+      {/* Apariencia */}
+      <div className="px-6 py-4 border-t border-border bg-surface flex items-center justify-between">
+        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+          Apariencia
+        </span>
+        <ThemeToggle />
+      </div>
+
       {/* Botón de Salir */}
-      <div className="p-4 border-t border-slate-800">
+      <div className="p-4 border-t border-border">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm text-red-400 hover:bg-red-500/10 transition-all cursor-pointer">
+          className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm text-danger hover:bg-danger/10 transition-all cursor-pointer">
           <LogOut size={20} />
           <span>Cerrar Sesión</span>
         </button>

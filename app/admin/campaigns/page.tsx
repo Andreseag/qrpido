@@ -40,6 +40,15 @@ export default function AdminCampaignsPage() {
 
         <div className="flex items-center gap-2 bg-surface p-1.5 rounded-2xl border border-border self-start md:self-auto">
           <button
+            onClick={() => setFilterType("all")}
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+              filterType === "all"
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/10"
+                : "text-muted-foreground hover:text-foreground"
+            }`}>
+            Todos ({customers.length})
+          </button>
+          <button
             onClick={() => setFilterType("inactive")}
             className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
               filterType === "inactive"
@@ -56,15 +65,6 @@ export default function AdminCampaignsPage() {
                 : "text-muted-foreground hover:text-foreground"
             }`}>
             VIP / Frecuentes
-          </button>
-          <button
-            onClick={() => setFilterType("all")}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
-              filterType === "all"
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/10"
-                : "text-muted-foreground hover:text-foreground"
-            }`}>
-            Todos ({customers.length})
           </button>
         </div>
       </header>

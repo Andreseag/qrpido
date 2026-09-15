@@ -34,26 +34,27 @@ export default function AdminInventoryPage() {
   };
 
   return (
-    <div className="p-6 md:p-10 relative">
-      {/* Toast Notification */}
+    <div className="p-4 sm:p-6 md:p-10 relative max-w-7xl mx-auto">
+      {/* Toast Notification Responsivo */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl bg-surface border border-border shadow-2xl text-foreground text-xs font-bold uppercase tracking-wider transition-all animate-in fade-in slide-in-from-bottom-5">
+        <div className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-2xl bg-surface border border-border shadow-2xl text-foreground text-xs font-bold uppercase tracking-wider transition-all animate-in fade-in slide-in-from-bottom-5">
           {toast.type === "success" ? (
-            <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400" />
+            <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 shrink-0" />
           )}
-          <span>{toast.message}</span>
+          <span className="truncate">{toast.message}</span>
         </div>
       )}
 
-      <header className="flex items-center justify-between border-b border-border pb-6 mb-8">
+      {/* Header Responsivo */}
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6 mb-6 md:mb-8">
         <div className="flex items-center gap-3">
-          <div className="bg-primary/10 p-3 rounded-2xl border border-primary/20">
-            <Package className="text-primary w-8 h-8" />
+          <div className="bg-primary/10 p-3 rounded-2xl border border-primary/20 shrink-0">
+            <Package className="text-primary w-7 h-7 md:w-8 md:h-8" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-foreground">
+            <h1 className="text-xl md:text-2xl font-black tracking-tight text-foreground">
               Inventario & Menú
             </h1>
             <p className="text-xs text-muted-foreground font-medium">
@@ -61,6 +62,13 @@ export default function AdminInventoryPage() {
             </p>
           </div>
         </div>
+        {!loading && products.length > 0 && (
+          <button
+            onClick={openCreateDrawer}
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-black px-5 py-3 rounded-2xl flex items-center justify-center gap-2 transition-all cursor-pointer text-xs uppercase tracking-wider shadow-lg shadow-primary/10 w-full sm:w-auto shrink-0">
+            <Plus className="w-4 h-4" /> Nuevo Producto
+          </button>
+        )}
       </header>
 
       {loading ? (
@@ -71,9 +79,9 @@ export default function AdminInventoryPage() {
           </p>
         </div>
       ) : products.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-32 bg-surface/40 rounded-3xl border border-border text-center p-8 shadow-sm">
+        <div className="flex flex-col items-center justify-center py-20 md:py-32 bg-surface/40 rounded-3xl border border-border text-center p-6 sm:p-8 shadow-sm">
           <Package className="w-16 h-16 text-muted-foreground/60 mb-4" />
-          <h2 className="text-xl font-bold text-foreground">
+          <h2 className="text-lg md:text-xl font-bold text-foreground">
             No hay ningún producto disponible
           </h2>
           <p className="text-muted-foreground text-sm mt-1 max-w-sm mb-6">
@@ -88,109 +96,191 @@ export default function AdminInventoryPage() {
         </div>
       ) : (
         <>
-          <div className="flex justify-end mb-6">
-            <button
-              onClick={openCreateDrawer}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-black px-6 py-3.5 rounded-2xl flex items-center gap-2 transition-all cursor-pointer text-xs uppercase tracking-wider shadow-lg shadow-primary/10">
-              <Plus className="w-4 h-4" /> Nuevo Producto
-            </button>
+          {/* 🟢 Vista Móvil: Tarjetas (visible solo en pantallas pequeñas) */}
+          <div className="block md:hidden space-y-4">
+            {products.map((item) => {
+              const utilidad = item.price - (item.cost || 0);
+              const margen =
+                item.price > 0 ? ((utilidad / item.price) * 100).toFixed(0) : 0;
+              const categoryName = getCategoryName(item.category_id);
+
+              return (
+                <div
+                  key={item.id}
+                  className="bg-surface rounded-2xl border border-border p-4 shadow-md space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-12 h-12 rounded-xl object-cover border border-border shrink-0"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-background border border-border flex items-center justify-center shrink-0">
+                          <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="font-bold text-foreground text-sm">
+                          {item.name}
+                        </p>
+                        {categoryName && (
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                            {categoryName}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => toggleStock(item.id, item.stock)}
+                      className={`px-3 py-1.5 rounded-xl font-black text-[10px] cursor-pointer shrink-0 ${
+                        item.stock
+                          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                          : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                      }`}>
+                      {item.stock ? "DISPONIBLE" : "AGOTADO"}
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 py-2 border-y border-border/60 text-center">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase block">
+                        Precio
+                      </span>
+                      <span className="font-black text-foreground text-xs">
+                        ${item.price.toLocaleString()}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase block">
+                        Costo
+                      </span>
+                      <span className="font-black text-muted-foreground text-xs">
+                        ${(item.cost || 0).toLocaleString()}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground uppercase block">
+                        Utilidad
+                      </span>
+                      <span className="font-black text-emerald-500 dark:text-emerald-400 text-xs">
+                        ${utilidad.toLocaleString()}{" "}
+                        <span className="text-[9px]">({margen}%)</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1">
+                    <button
+                      onClick={() => openEditDrawer(item)}
+                      className="w-full py-2.5 bg-background hover:bg-border text-foreground border border-border rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 text-xs font-bold">
+                      <Pencil className="w-4 h-4" /> Editar Producto
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="bg-surface rounded-3xl border border-border overflow-hidden shadow-2xl">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-xs font-black text-muted-foreground uppercase tracking-widest bg-background/60 border-b border-border">
-                  <th className="px-6 py-4">Producto</th>
-                  <th className="px-6 py-4 text-center">Precio Venta</th>
-                  <th className="px-6 py-4 text-center">Costo Producción</th>
-                  <th className="px-6 py-4 text-center">Utilidad Est.</th>
-                  <th className="px-6 py-4 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {products.map((item) => {
-                  const utilidad = item.price - (item.cost || 0);
-                  const margen =
-                    item.price > 0
-                      ? ((utilidad / item.price) * 100).toFixed(0)
-                      : 0;
-                  const categoryName = getCategoryName(item.category_id);
-                  return (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-border/30 transition-all">
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          {item.image_url ? (
-                            <img
-                              src={item.image_url}
-                              alt={item.name}
-                              className="w-10 h-10 rounded-xl object-cover border border-border shrink-0"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center shrink-0">
-                              <ImageIcon className="w-4 h-4 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-bold text-foreground">
-                              {item.name}
-                            </p>
-                            {categoryName && (
-                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                                {categoryName}
-                              </span>
+          {/* 🟢 Vista Escritorio: Tabla clásica (visible en md en adelante) */}
+          <div className="hidden md:block bg-surface rounded-3xl border border-border overflow-hidden shadow-2xl">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left text-xs font-black text-muted-foreground uppercase tracking-widest bg-background/60 border-b border-border">
+                    <th className="px-6 py-4">Producto</th>
+                    <th className="px-6 py-4 text-center">Precio Venta</th>
+                    <th className="px-6 py-4 text-center">Costo Producción</th>
+                    <th className="px-6 py-4 text-center">Utilidad Est.</th>
+                    <th className="px-6 py-4 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {products.map((item) => {
+                    const utilidad = item.price - (item.cost || 0);
+                    const margen =
+                      item.price > 0
+                        ? ((utilidad / item.price) * 100).toFixed(0)
+                        : 0;
+                    const categoryName = getCategoryName(item.category_id);
+                    return (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-border/30 transition-all">
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-3">
+                            {item.image_url ? (
+                              <img
+                                src={item.image_url}
+                                alt={item.name}
+                                className="w-10 h-10 rounded-xl object-cover border border-border shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center shrink-0">
+                                <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                              </div>
                             )}
+                            <div>
+                              <p className="font-bold text-foreground">
+                                {item.name}
+                              </p>
+                              {categoryName && (
+                                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                                  {categoryName}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-5 text-center font-black text-foreground">
-                        ${item.price.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-5 text-center font-black text-muted-foreground">
-                        ${(item.cost || 0).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-5 text-center">
-                        <span className="font-black text-emerald-500 dark:text-emerald-400">
-                          ${utilidad.toLocaleString()}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground block">
-                          ({margen}%)
-                        </span>
-                      </td>
-                      <td className="px-6 py-5 text-right flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditDrawer(item)}
-                          className="p-2 bg-background hover:bg-border text-foreground border border-border rounded-xl transition-colors cursor-pointer"
-                          title="Editar producto">
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => toggleStock(item.id, item.stock)}
-                          className={`px-4 py-2 rounded-xl font-black text-[10px] cursor-pointer ${
-                            item.stock
-                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                              : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
-                          }`}>
-                          {item.stock ? "DISPONIBLE" : "AGOTADO"}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        </td>
+                        <td className="px-6 py-5 text-center font-black text-foreground">
+                          ${item.price.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-5 text-center font-black text-muted-foreground">
+                          ${(item.cost || 0).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-5 text-center">
+                          <span className="font-black text-emerald-500 dark:text-emerald-400">
+                            ${utilidad.toLocaleString()}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground block">
+                            ({margen}%)
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 text-right flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => openEditDrawer(item)}
+                            className="p-2 bg-background hover:bg-border text-foreground border border-border rounded-xl transition-colors cursor-pointer"
+                            title="Editar producto">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => toggleStock(item.id, item.stock)}
+                            className={`px-4 py-2 rounded-xl font-black text-[10px] cursor-pointer ${
+                              item.stock
+                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                            }`}>
+                            {item.stock ? "DISPONIBLE" : "AGOTADO"}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}
 
-      {/* Drawer de Creación / Edición */}
+      {/* Drawer de Creación / Edición Responsivo */}
       {isDrawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div
             className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             onClick={() => setIsDrawerOpen(false)}></div>
-          <div className="relative w-full max-w-md bg-surface border-l border-border h-full p-8 flex flex-col justify-between shadow-2xl overflow-y-auto">
+          <div className="relative w-full max-w-md bg-surface border-l border-border h-full p-5 sm:p-8 flex flex-col justify-between shadow-2xl overflow-y-auto">
             <form onSubmit={handleSubmitProduct} className="space-y-6">
               <div className="flex justify-between items-center border-b border-border pb-4">
                 <h2 className="text-xl font-black text-foreground">
@@ -200,7 +290,7 @@ export default function AdminInventoryPage() {
                 <button
                   type="button"
                   onClick={() => setIsDrawerOpen(false)}
-                  className="text-muted-foreground hover:text-foreground cursor-pointer">
+                  className="text-muted-foreground hover:text-foreground cursor-pointer p-1">
                   <X />
                 </button>
               </div>
@@ -220,7 +310,8 @@ export default function AdminInventoryPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* Grid responsivo para precio y costo */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
                     Precio Venta (COP)
@@ -251,7 +342,7 @@ export default function AdminInventoryPage() {
                 </div>
               </div>
 
-              {/* --- Campos del Menú Digital --- */}
+              {/* Categoría */}
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
                   Categoría del Menú
@@ -280,6 +371,7 @@ export default function AdminInventoryPage() {
                 )}
               </div>
 
+              {/* Descripción */}
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
                   Descripción / Ingredientes
@@ -295,6 +387,7 @@ export default function AdminInventoryPage() {
                 />
               </div>
 
+              {/* Foto */}
               <div>
                 <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
                   Foto del Producto
@@ -328,8 +421,8 @@ export default function AdminInventoryPage() {
                   />
                 )}
               </div>
-              {/* --- Fin campos del Menú Digital --- */}
 
+              {/* Disponibilidad */}
               <div className="flex items-center gap-3 pt-2">
                 <input
                   type="checkbox"

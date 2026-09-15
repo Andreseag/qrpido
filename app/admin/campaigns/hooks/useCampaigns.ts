@@ -8,7 +8,7 @@ export function useCampaigns() {
   const [customers, setCustomers] = useState<CustomerStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<"all" | "inactive" | "frequent">(
-    "inactive",
+    "all",
   );
   const [customPromo, setCustomPromo] = useState(
     "¡Tenemos un 10% de descuento en tu próximo pedido si pides hoy! 🍔🔥",

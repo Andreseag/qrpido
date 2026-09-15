@@ -49,8 +49,9 @@ export default function AdminLayout({
 
   return (
     <SelectedRestaurantProvider>
-      <div className="min-h-screen bg-background text-foreground flex">
-        {/* El Sidebar permanece fijo en todo el sistema admin */}
+      {/* 🟢 Cambiamos a flex-col en móvil y md:flex-row en escritorio */}
+      <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row">
+        {/* El Sidebar incluye la barra superior móvil y el menú lateral de escritorio */}
         <AdminSidebar />
 
         {/* Contenido dinámico de la página actual */}
@@ -59,9 +60,7 @@ export default function AdminLayout({
         {/* 🟢 1. El Chat Flotante de WhatsApp */}
         {/* <FloatingWhatsAppChat
         onConvertToOrder={(clientData) => {
-          // Guardamos los datos del cliente que vienen del chat
           setClientDataToOrder(clientData);
-          // Abrimos automáticamente el creador de pedidos
           setOrderManagerOpen(true);
         }}
       /> */}
@@ -70,10 +69,9 @@ export default function AdminLayout({
         <FloatingOrderManager
           isOpen={orderManagerOpen}
           onClose={() => setOrderManagerOpen(false)}
-          initialClientData={clientDataToOrder} // Le pasamos el nombre y teléfono autocompletados
+          initialClientData={clientDataToOrder}
         />
         {/* <WhatsAppFloatingWidget restaurantId={restaurantId} /> */}
-        {/*  */}
       </div>
     </SelectedRestaurantProvider>
   );

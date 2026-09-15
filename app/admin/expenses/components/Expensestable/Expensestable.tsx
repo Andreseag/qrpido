@@ -1,4 +1,4 @@
-import { Paperclip, Pencil, Trash2, Repeat } from "lucide-react";
+import { Paperclip, Pencil, Trash2, Repeat, Receipt } from "lucide-react";
 import { Expense, EXPENSE_CATEGORY_LABELS } from "../../types";
 
 interface ExpensesTableProps {
@@ -16,10 +16,16 @@ export function ExpensesTable({
 }: ExpensesTableProps) {
   if (expenses.length === 0) {
     return (
-      <div className="bg-surface border border-border rounded-3xl p-16 text-center">
-        <p className="text-xs text-muted-foreground">
-          No hay gastos registrados en este período.
-        </p>
+      <div className="bg-surface border border-border rounded-3xl p-12 text-center flex flex-col items-center justify-center gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-inner">
+          <Receipt className="w-6 h-6 stroke-[2.2]" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-xs font-bold text-foreground">Sin movimientos</p>
+          <p className="text-[11px] text-muted-foreground">
+            No hay gastos registrados en este período.
+          </p>
+        </div>
       </div>
     );
   }

@@ -103,7 +103,7 @@ export default function KitchenPage() {
                     key={order.id}
                     className={`bg-surface rounded-3xl border flex flex-col justify-between transition-all overflow-hidden shadow-2xl ${
                       isDelayed
-                        ? "border-destructive/50 shadow-destructive/10"
+                        ? "border-red-500 shadow-red-500/20"
                         : "border-border"
                     }`}>
                     {/* Tipo de Pedido e Identificador */}
@@ -230,7 +230,7 @@ export default function KitchenPage() {
 
                     {/* Botones de Acción */}
                     <div className="p-4 bg-background/40 border-t border-border">
-                      {order.state === "pendiente" ? (
+                      {order.state === "en_cocina" ? (
                         <button
                           onClick={() =>
                             updateOrderState(order.id, "preparando")

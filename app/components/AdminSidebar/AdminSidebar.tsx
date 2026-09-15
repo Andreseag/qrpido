@@ -15,6 +15,7 @@ import {
   UserCheck,
   Settings,
   Wallet,
+  QrCode,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
@@ -126,6 +127,12 @@ export default function AdminSidebar() {
       name: "Clientes",
       href: "/admin/clientes",
       icon: Users,
+      roles: ["owner"],
+    },
+    {
+      name: "Menú Digital",
+      href: "/admin/menu",
+      icon: QrCode,
       roles: ["owner"],
     },
     {

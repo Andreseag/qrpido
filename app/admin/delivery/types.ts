@@ -45,7 +45,7 @@ export const COLUMNS: KanbanColumnDef[] = [
   },
   {
     id: "preparando",
-    title: "En Cocina",
+    title: "Preparando",
     headerBg: "bg-amber-500/10 border-amber-500/30 text-amber-400",
   },
   {

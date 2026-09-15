@@ -9,6 +9,11 @@ interface Toast {
   type: "success" | "error";
 }
 
+interface Category {
+  id: string;
+  name: string;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -16,28 +21,51 @@ interface Product {
   cost: number;
   stock: boolean;
   restaurant_id: string;
+  category_id: string | null;
+  description: string | null;
+  image_url: string | null;
 }
+
+interface ProductFormData {
+  name: string;
+  price: string;
+  cost: string;
+  stock: boolean;
+  categoryId: string | null;
+  description: string;
+  imageFile: File | null;
+  imageUrl: string | null;
+}
+
+const emptyFormData: ProductFormData = {
+  name: "",
+  price: "",
+  cost: "",
+  stock: true,
+  categoryId: null,
+  description: "",
+  imageFile: null,
+  imageUrl: null,
+};
 
 export function useInventory() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    price: "",
-    cost: "",
-    stock: true,
-  });
+  const [formData, setFormData] = useState<ProductFormData>(emptyFormData);
 
   // Selección persistida globalmente (Context + localStorage)
   const { selectedRestaurantId } = useSelectedRestaurant();
 
-  // Escuchar cambios en el restaurante activo para recargar el inventario automáticamente
+  // Escuchar cambios en el restaurante activo para recargar inventario y categorías
   useEffect(() => {
     if (selectedRestaurantId) {
       fetchInventory(selectedRestaurantId);
+      fetchCategories(selectedRestaurantId);
     }
   }, [selectedRestaurantId]);
 
@@ -69,6 +97,37 @@ export function useInventory() {
     setLoading(false);
   };
 
+  // Categorías del Menú Digital — para asignar cada producto a una sección
+  const fetchCategories = async (restId: string) => {
+    const { data, error } = await supabase
+      .from("menu_categories")
+      .select("id, name")
+      .eq("restaurant_id", restId)
+      .order("display_order", { ascending: true });
+
+    if (!error && data) setCategories(data);
+  };
+
+  // Sube la foto del producto al bucket público del Menú Digital
+  const uploadProductImage = async (
+    restaurantId: string,
+    file: File,
+  ): Promise<string> => {
+    const filePath = `${restaurantId}/${Date.now()}-${file.name}`;
+    const { error } = await supabase.storage
+      .from("menu-images")
+      .upload(filePath, file);
+
+    if (error) {
+      throw new Error("No se pudo subir la imagen: " + error.message);
+    }
+
+    const { data } = supabase.storage
+      .from("menu-images")
+      .getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
   const toggleStock = async (id: string, currentStatus: boolean) => {
     setProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, stock: !currentStatus } : p)),
@@ -91,7 +150,7 @@ export function useInventory() {
 
   const openCreateDrawer = () => {
     setEditingProduct(null);
-    setFormData({ name: "", price: "", cost: "", stock: true });
+    setFormData(emptyFormData);
     setIsDrawerOpen(true);
   };
 
@@ -102,6 +161,10 @@ export function useInventory() {
       price: product.price.toString(),
       cost: (product.cost || 0).toString(),
       stock: product.stock,
+      categoryId: product.category_id,
+      description: product.description || "",
+      imageFile: null,
+      imageUrl: product.image_url,
     });
     setIsDrawerOpen(true);
   };
@@ -110,20 +173,45 @@ export function useInventory() {
     e.preventDefault();
     if (!selectedRestaurantId) return;
 
+    setSaving(true);
+
     const priceNum = parseFloat(formData.price);
     const costNum = parseFloat(formData.cost) || 0;
+
+    // Si hay una foto nueva seleccionada, se sube primero; si no, se
+    // conserva la URL que ya tenía el producto (o null si nunca tuvo).
+    let imageUrl = formData.imageUrl;
+    if (formData.imageFile) {
+      try {
+        imageUrl = await uploadProductImage(
+          selectedRestaurantId,
+          formData.imageFile,
+        );
+      } catch (err: any) {
+        showToast(err.message || "Error al subir la imagen", "error");
+        setSaving(false);
+        return;
+      }
+    }
+
+    const payload = {
+      name: formData.name,
+      price: priceNum,
+      cost: costNum,
+      stock: formData.stock,
+      category_id: formData.categoryId,
+      description: formData.description || null,
+      image_url: imageUrl,
+    };
 
     if (editingProduct) {
       const { data, error } = await supabase
         .from("products")
-        .update({
-          name: formData.name,
-          price: priceNum,
-          cost: costNum,
-          stock: formData.stock,
-        })
+        .update(payload)
         .eq("id", editingProduct.id)
         .select();
+
+      setSaving(false);
 
       if (error) {
         showToast("Error al actualizar: " + error.message, "error");
@@ -135,15 +223,7 @@ export function useInventory() {
       } else {
         setProducts((prev) =>
           prev.map((p) =>
-            p.id === editingProduct.id
-              ? {
-                  ...p,
-                  name: formData.name,
-                  price: priceNum,
-                  cost: costNum,
-                  stock: formData.stock,
-                }
-              : p,
+            p.id === editingProduct.id ? (data[0] as Product) : p,
           ),
         );
         setIsDrawerOpen(false);
@@ -153,23 +233,17 @@ export function useInventory() {
     } else {
       const { data, error } = await supabase
         .from("products")
-        .insert([
-          {
-            name: formData.name,
-            price: priceNum,
-            cost: costNum,
-            stock: formData.stock,
-            restaurant_id: selectedRestaurantId,
-          },
-        ])
+        .insert([{ ...payload, restaurant_id: selectedRestaurantId }])
         .select();
+
+      setSaving(false);
 
       if (error) {
         showToast("Error al crear: " + error.message, "error");
       } else if (data) {
-        setProducts([...products, data[0]]);
+        setProducts((prev) => [...prev, data[0] as Product]);
         setIsDrawerOpen(false);
-        setFormData({ name: "", price: "", cost: "", stock: true });
+        setFormData(emptyFormData);
         showToast("¡Producto creado con éxito!");
       }
     }
@@ -177,7 +251,9 @@ export function useInventory() {
 
   return {
     products,
+    categories,
     loading,
+    saving,
     restaurantId: selectedRestaurantId,
     isDrawerOpen,
     setIsDrawerOpen,

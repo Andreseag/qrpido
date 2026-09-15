@@ -6,13 +6,16 @@ import {
   Pencil,
   CheckCircle2,
   AlertCircle,
+  ImageIcon,
 } from "lucide-react";
 import { useInventory } from "./hooks/useInventory";
 
 export default function AdminInventoryPage() {
   const {
     products,
+    categories,
     loading,
+    saving,
     isDrawerOpen,
     setIsDrawerOpen,
     editingProduct,
@@ -24,6 +27,11 @@ export default function AdminInventoryPage() {
     openEditDrawer,
     handleSubmitProduct,
   } = useInventory();
+
+  const getCategoryName = (categoryId: string | null) => {
+    if (!categoryId) return null;
+    return categories.find((c) => c.id === categoryId)?.name || null;
+  };
 
   return (
     <div className="p-6 md:p-10 relative">
@@ -106,12 +114,35 @@ export default function AdminInventoryPage() {
                     item.price > 0
                       ? ((utilidad / item.price) * 100).toFixed(0)
                       : 0;
+                  const categoryName = getCategoryName(item.category_id);
                   return (
                     <tr
                       key={item.id}
                       className="hover:bg-border/30 transition-all">
-                      <td className="px-6 py-5 font-bold text-foreground">
-                        {item.name}
+                      <td className="px-6 py-5">
+                        <div className="flex items-center gap-3">
+                          {item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.name}
+                              className="w-10 h-10 rounded-xl object-cover border border-border shrink-0"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl bg-background border border-border flex items-center justify-center shrink-0">
+                              <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-bold text-foreground">
+                              {item.name}
+                            </p>
+                            {categoryName && (
+                              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                                {categoryName}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-5 text-center font-black text-foreground">
                         ${item.price.toLocaleString()}
@@ -159,7 +190,7 @@ export default function AdminInventoryPage() {
           <div
             className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             onClick={() => setIsDrawerOpen(false)}></div>
-          <div className="relative w-full max-w-md bg-surface border-l border-border h-full p-8 flex flex-col justify-between shadow-2xl">
+          <div className="relative w-full max-w-md bg-surface border-l border-border h-full p-8 flex flex-col justify-between shadow-2xl overflow-y-auto">
             <form onSubmit={handleSubmitProduct} className="space-y-6">
               <div className="flex justify-between items-center border-b border-border pb-4">
                 <h2 className="text-xl font-black text-foreground">
@@ -220,6 +251,85 @@ export default function AdminInventoryPage() {
                 </div>
               </div>
 
+              {/* --- Campos del Menú Digital --- */}
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
+                  Categoría del Menú
+                </label>
+                <select
+                  value={formData.categoryId ?? ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      categoryId: e.target.value || null,
+                    })
+                  }
+                  className="w-full p-4 bg-background border border-border rounded-2xl text-foreground text-sm cursor-pointer focus:outline-none focus:border-primary transition-colors">
+                  <option value="">Sin categoría</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+                {categories.length === 0 && (
+                  <p className="text-[10px] text-muted-foreground mt-1.5">
+                    Aún no tienes categorías — créalas en Menú Digital para
+                    organizar tus platos.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
+                  Descripción / Ingredientes
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Ej: Carne de res, queso cheddar, lechuga, tomate, salsa especial de la casa"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                  className="w-full p-4 bg-background border border-border rounded-2xl text-foreground text-sm resize-none focus:outline-none focus:border-primary transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
+                  Foto del Producto
+                </label>
+                <label className="w-full flex items-center gap-2 p-4 bg-background border border-dashed border-border rounded-2xl text-muted-foreground text-xs cursor-pointer hover:border-primary transition-colors">
+                  <ImageIcon className="w-4 h-4 shrink-0" />
+                  <span className="truncate">
+                    {formData.imageFile
+                      ? formData.imageFile.name
+                      : formData.imageUrl
+                        ? "Reemplazar foto actual"
+                        : "Subir foto (opcional)"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        imageFile: e.target.files?.[0] || null,
+                      })
+                    }
+                  />
+                </label>
+                {formData.imageUrl && !formData.imageFile && (
+                  <img
+                    src={formData.imageUrl}
+                    alt="Vista previa"
+                    className="mt-2 w-20 h-20 object-cover rounded-xl border border-border"
+                  />
+                )}
+              </div>
+              {/* --- Fin campos del Menú Digital --- */}
+
               <div className="flex items-center gap-3 pt-2">
                 <input
                   type="checkbox"
@@ -239,8 +349,13 @@ export default function AdminInventoryPage() {
 
               <button
                 type="submit"
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-4 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer transition-all shadow-lg shadow-primary/10">
-                {editingProduct ? "Actualizar Producto" : "Guardar Producto"}
+                disabled={saving}
+                className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground py-4 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer transition-all shadow-lg shadow-primary/10">
+                {saving
+                  ? "Guardando..."
+                  : editingProduct
+                    ? "Actualizar Producto"
+                    : "Guardar Producto"}
               </button>
             </form>
           </div>

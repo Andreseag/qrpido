@@ -329,7 +329,7 @@ export default function FloatingOrderManager({
           : null,
       items: draft.selectedItems,
       total_price: totalPrice,
-      state: "pendiente",
+      state: "en_cocina",
       note: draft.note,
     };
 

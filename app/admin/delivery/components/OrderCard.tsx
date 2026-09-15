@@ -136,18 +136,18 @@ export function OrderCard({ order, onUpdateState }: OrderCardProps) {
           </button>
         )}
 
-        {order.state === "en_cocina" && (
+        {/* {order.state === "en_cocina" && (
           <button
             onClick={() => onUpdateState(order.id, "listo")}
             className="w-full bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-500 border border-indigo-500/30 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer">
             <CheckCircle2 className="w-3 h-3" /> Marcar Listo
           </button>
-        )}
+        )} */}
 
         {order.state === "listo" && (
           <button
             onClick={() => onUpdateState(order.id, "en_camino")}
-            className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer">
+            className="w-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-500 border border-purple-500/30 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer">
             <Bike className="w-3 h-3" /> Enviar (En Camino)
           </button>
         )}
@@ -155,7 +155,7 @@ export function OrderCard({ order, onUpdateState }: OrderCardProps) {
         {order.state === "en_camino" && (
           <button
             onClick={() => onUpdateState(order.id, "entregado")}
-            className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer">
+            className="w-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-500 border border-emerald-500/30 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center justify-center gap-1 transition-all cursor-pointer">
             <CheckCircle2 className="w-3 h-3" /> Entregado
           </button>
         )}

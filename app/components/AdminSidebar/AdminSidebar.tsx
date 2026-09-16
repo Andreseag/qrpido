@@ -12,7 +12,6 @@ import {
   MessageCircle,
   Bike,
   UserCheck,
-  Settings,
   Wallet,
   QrCode,
   Menu,
@@ -50,22 +49,25 @@ export default function AdminSidebar() {
   const { activeRestaurant } = useActiveRestaurant();
   const [userName, setUserName] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [userLoading, setUserLoading] = useState<boolean>(true);
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    // Si aún no existe el restaurante activo, no ejecutamos nada todavía
     if (!activeRestaurant) return;
 
     const fetchUserProfile = async () => {
+      setUserLoading(true);
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session) return;
+      if (!session) {
+        setUserLoading(false);
+        return;
+      }
 
       setUserId(session.user.id);
 
-      // Consultar el nombre personalizado desde restaurant_members
       const { data: memberData, error } = await supabase
         .from("restaurant_members")
         .select("full_name")
@@ -84,6 +86,7 @@ export default function AdminSidebar() {
             : "Colaborador",
         );
       }
+      setUserLoading(false);
     };
 
     fetchUserProfile();
@@ -94,7 +97,6 @@ export default function AdminSidebar() {
     router.push("/login");
   };
 
-  // Definición estricta de accesos por rol
   const navItems: NavItem[] = [
     {
       name: "Dashboard",
@@ -165,26 +167,32 @@ export default function AdminSidebar() {
 
   const translatedRole = role ? roleTranslations[role] || role : "";
 
-  // Contenido central del Sidebar reutilizable tanto para escritorio como móvil
   const SidebarContent = () => (
     <div className="flex flex-col justify-between h-full">
       <div>
-        {/* Logo / Header */}
         <div className="p-6 border-b border-border flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 overflow-hidden">
+          <div className="flex items-center gap-3 overflow-hidden flex-1">
             <div className="bg-primary p-2.5 rounded-2xl text-primary-foreground font-black shrink-0">
               <Store className="w-6 h-6" />
             </div>
-            <div className="overflow-hidden">
-              <h1 className="font-black text-lg text-foreground tracking-tight truncate">
-                {activeRestaurant?.name || "QRPido"}
-              </h1>
-              <p className="text-[10px] font-bold text-primary uppercase tracking-widest truncate">
-                {loading ? "Cargando rol..." : `Rol: ${translatedRole}`}
-              </p>
+            <div className="overflow-hidden flex-1">
+              {loading ? (
+                <div className="space-y-1.5 py-0.5">
+                  <div className="h-4 w-28 bg-border/60 rounded-md animate-pulse"></div>
+                  <div className="h-2.5 w-16 bg-border/60 rounded-md animate-pulse"></div>
+                </div>
+              ) : (
+                <>
+                  <h1 className="font-black text-lg text-foreground tracking-tight truncate">
+                    {activeRestaurant?.name || "QRPido"}
+                  </h1>
+                  <p className="text-[10px] font-bold text-primary uppercase tracking-widest truncate">
+                    Rol: {translatedRole}
+                  </p>
+                </>
+              )}
             </div>
           </div>
-          {/* Botón de cierre solo visible en móvil dentro del cajón */}
           <button
             onClick={() => setMobileOpen(false)}
             className="md:hidden text-muted-foreground hover:text-foreground p-2 rounded-xl hover:bg-border/60 transition-colors">
@@ -192,31 +200,37 @@ export default function AdminSidebar() {
           </button>
         </div>
 
-        {/* Selector de Restaurante */}
         <RestaurantSwitcher userId={userId} />
 
-        {/* Info del Usuario Logueado (Perfil) */}
         <div className="px-6 py-4 border-b border-border/60 bg-background/30 flex items-center gap-3">
           <div className="bg-border p-2 rounded-xl text-muted-foreground shrink-0">
             <UserCheck className="w-4 h-4 text-primary" />
           </div>
-          <div className="overflow-hidden">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              Conectado como
-            </p>
-            <p
-              className="text-sm font-bold text-foreground truncate"
-              title={userName}>
-              {userName || "Cargando..."}
-            </p>
+          <div className="overflow-hidden flex-1">
+            {userLoading ? (
+              <div className="space-y-1.5 py-0.5">
+                <div className="h-2.5 w-20 bg-border/60 rounded-md animate-pulse"></div>
+                <div className="h-3.5 w-28 bg-border/60 rounded-md animate-pulse"></div>
+              </div>
+            ) : (
+              <>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Conectado como
+                </p>
+                <p
+                  className="text-sm font-bold text-foreground truncate"
+                  title={userName}>
+                  {userName}
+                </p>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Links de Navegación Dinámicos */}
         <nav className="p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-280px)]">
           {loading ? (
             <div className="space-y-2 py-2">
-              {[1, 2, 3].map((n) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <div
                   key={n}
                   className="h-11 bg-border/40 rounded-2xl animate-pulse"
@@ -247,7 +261,6 @@ export default function AdminSidebar() {
       </div>
 
       <div>
-        {/* Apariencia */}
         <div className="px-6 py-4 border-t border-border bg-surface flex items-center justify-between">
           <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
             Apariencia
@@ -255,7 +268,6 @@ export default function AdminSidebar() {
           <ThemeToggle />
         </div>
 
-        {/* Botón de Salir */}
         <div className="p-4 border-t border-border">
           <button
             onClick={handleLogout}
@@ -270,46 +282,55 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Barra superior flotante para móviles y tablets */}
       <div className="md:hidden sticky top-0 z-30 bg-surface border-b border-border px-4 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3 overflow-hidden">
+        <div className="flex items-center gap-3 overflow-hidden flex-1">
           <div className="bg-primary p-2 rounded-xl text-primary-foreground font-black shrink-0">
             <Store className="w-5 h-5" />
           </div>
-          <div className="overflow-hidden">
-            <h1 className="font-black text-sm text-foreground tracking-tight truncate">
-              {activeRestaurant?.name || "QRPido"}
-            </h1>
-            <p className="text-[9px] font-bold text-primary uppercase tracking-widest truncate">
-              {loading ? "Cargando..." : translatedRole}
-            </p>
+          <div className="overflow-hidden flex-1">
+            {loading ? (
+              <div className="space-y-1 py-0.5">
+                <div className="h-3.5 w-24 bg-border/60 rounded-md animate-pulse"></div>
+                <div className="h-2 w-14 bg-border/60 rounded-md animate-pulse"></div>
+              </div>
+            ) : (
+              <>
+                <h1 className="font-black text-sm text-foreground tracking-tight truncate">
+                  {activeRestaurant?.name || "QRPido"}
+                </h1>
+                <p className="text-[9px] font-bold text-primary uppercase tracking-widest truncate">
+                  {translatedRole}
+                </p>
+              </>
+            )}
           </div>
         </div>
         <button
           onClick={() => setMobileOpen(true)}
-          className="p-2.5 rounded-xl bg-border/40 text-foreground hover:bg-border/80 transition-colors"
+          className="p-2.5 rounded-xl bg-border/40 text-foreground hover:bg-border/80 transition-colors shrink-0"
           aria-label="Abrir menú de navegación">
           <Menu size={22} />
         </button>
       </div>
 
-      {/* Fondo oscuro translúcido al abrir el menú en móviles */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-xs transition-opacity"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      {/* Fondo oscuro translúcido con transición de opacidad real */}
+      <div
+        className={`fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm transition-all duration-300 ease-out ${
+          mobileOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setMobileOpen(false)}
+      />
 
-      {/* Panel deslizante (Drawer) para móviles */}
+      {/* Panel deslizante (Drawer) para móviles con curva de aceleración profesional */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-surface border-r border-border flex flex-col justify-between md:hidden shadow-2xl transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-surface border-r border-border flex flex-col justify-between md:hidden shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}>
         <SidebarContent />
       </aside>
 
-      {/* Sidebar fijo para computadoras de escritorio */}
       <aside className="w-64 bg-surface border-r border-border hidden md:flex flex-col justify-between shrink-0 min-h-screen sticky top-0">
         <SidebarContent />
       </aside>

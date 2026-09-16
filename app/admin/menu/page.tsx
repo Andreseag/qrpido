@@ -42,18 +42,21 @@ export default function MenuDigitalPage() {
   }
 
   return (
-    <div className="p-6 md:p-10">
-      <header className="flex items-center gap-3 border-b border-border pb-6 mb-8">
-        <div className="bg-primary/10 p-3 rounded-2xl border border-primary/20">
-          <QrCode className="text-primary w-8 h-8" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-foreground">
-            Menú Digital
-          </h1>
-          <p className="text-xs text-muted-foreground font-medium">
-            Configura tu menú público y descarga el QR para tus mesas
-          </p>
+    <div className="p-4 sm:p-6 md:p-10">
+      {/* Header Adaptativo */}
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-6 mb-8 gap-4">
+        <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+          <div className="bg-primary/10 p-2.5 sm:p-3 rounded-2xl border border-primary/20 shrink-0">
+            <QrCode className="text-primary w-6 h-6 sm:w-8 sm:h-8" />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+              Menú Digital
+            </h1>
+            <p className="text-xs text-muted-foreground font-medium">
+              Configura tu menú público y descarga el QR para tus mesas
+            </p>
+          </div>
         </div>
       </header>
 
@@ -68,42 +71,50 @@ export default function MenuDigitalPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
             {/* URL pública / slug */}
-            <div className="bg-surface border border-border rounded-3xl p-6 space-y-4">
+            <div className="bg-surface border border-border rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
               <h2 className="text-sm font-black text-foreground uppercase tracking-wider">
                 Dirección del Menú
               </h2>
-              <div>
-                <label className="text-[10px] font-bold uppercase text-muted-foreground block mb-1.5">
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold uppercase text-muted-foreground block">
                   URL personalizada
                 </label>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground shrink-0">
+
+                {/* Contenedor Adaptativo de la URL (Móvil: Columna / Desktop: Fila) */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-background border border-border p-2 rounded-2xl focus-within:border-primary transition">
+                  <span className="text-xs text-muted-foreground font-mono px-2 py-1 bg-surface/80 rounded-xl truncate">
                     {origin}/menu/
                   </span>
-                  <input
-                    value={slugInput}
-                    onChange={(e) => setSlugInput(e.target.value)}
-                    className="flex-1 p-2.5 bg-background border border-border rounded-xl text-foreground text-xs outline-none focus:border-primary"
-                  />
-                  <button
-                    onClick={() => saveSlug(slugInput)}
-                    disabled={saving || slugInput === slug}
-                    className="bg-primary hover:bg-primary/90 disabled:opacity-40 text-primary-foreground p-2.5 rounded-xl cursor-pointer">
-                    <Check className="w-4 h-4" />
-                  </button>
+
+                  <div className="flex items-center gap-2 flex-1">
+                    <input
+                      value={slugInput}
+                      onChange={(e) => setSlugInput(e.target.value)}
+                      className="w-full bg-transparent text-foreground text-xs font-bold outline-none px-1"
+                      placeholder="tu-restaurante"
+                    />
+                    <button
+                      onClick={() => saveSlug(slugInput)}
+                      disabled={saving || slugInput === slug}
+                      className="bg-primary hover:bg-primary/90 disabled:opacity-40 text-primary-foreground p-2.5 rounded-xl transition shrink-0 cursor-pointer active:scale-95">
+                      <Check className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                <p className="text-[10px] text-muted-foreground mt-1.5">
+
+                <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">
                   Si cambias esto después de imprimir el QR, el código impreso
                   dejará de funcionar — solo cámbialo si es necesario.
                 </p>
               </div>
 
-              <div className="flex items-center justify-between bg-background border border-border rounded-xl p-3">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between bg-background border border-border rounded-2xl p-3.5">
+                <div className="flex items-center gap-2.5">
                   {isMenuPublic ? (
-                    <Eye className="w-4 h-4 text-success" />
+                    <Eye className="w-4 h-4 text-success shrink-0" />
                   ) : (
-                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                    <EyeOff className="w-4 h-4 text-muted-foreground shrink-0" />
                   )}
                   <span className="text-xs font-bold text-foreground">
                     Menú {isMenuPublic ? "visible al público" : "oculto"}
@@ -113,7 +124,7 @@ export default function MenuDigitalPage() {
                   onClick={() => toggleMenuPublic(!isMenuPublic)}
                   role="switch"
                   aria-checked={isMenuPublic}
-                  className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${
+                  className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
                     isMenuPublic ? "bg-primary" : "bg-border"
                   }`}>
                   <span
@@ -134,7 +145,9 @@ export default function MenuDigitalPage() {
             />
           </div>
 
-          <div>{origin && <QrCodeGenerator menuUrl={menuUrl} />}</div>
+          <div className="w-full">
+            {origin && <QrCodeGenerator menuUrl={menuUrl} />}
+          </div>
         </div>
       )}
     </div>

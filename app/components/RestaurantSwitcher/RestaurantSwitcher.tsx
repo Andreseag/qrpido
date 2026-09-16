@@ -14,9 +14,18 @@ export default function RestaurantSwitcher({
   const { selectedRestaurantId, setSelectedRestaurantId } =
     useSelectedRestaurant();
 
-  // Si todavía está cargando, no hay restaurantes, o solo hay uno,
-  // no hay nada que "cambiar" — no mostramos el select.
-  if (loading || restaurants.length <= 1) return null;
+  // 🟢 Si está cargando, mostramos el skeleton para evitar saltos de layout
+  if (loading) {
+    return (
+      <div className="px-6 py-3 border-b border-border/60 bg-background/30 animate-pulse">
+        <div className="h-2.5 w-28 bg-border/80 rounded-md mb-2"></div>
+        <div className="w-full h-[42px] bg-surface border border-border rounded-xl"></div>
+      </div>
+    );
+  }
+
+  // Si no hay restaurantes o solo hay uno, no hay nada que cambiar
+  if (restaurants.length <= 1) return null;
 
   return (
     <div className="px-6 py-3 border-b border-border/60 bg-background/30">

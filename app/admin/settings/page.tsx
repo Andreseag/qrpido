@@ -38,18 +38,24 @@ export default function AdminSettingsPage() {
       <div className="min-h-screen bg-background text-foreground flex relative">
         <main className="flex-1 p-6 md:p-10 overflow-y-auto">
           {/* Header */}
-          <header className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-border pb-6 mb-8 gap-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/15 p-3 rounded-2xl border border-primary/30">
-                <Settings className="text-primary w-8 h-8" />
+          <header className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-6 mb-8 gap-4">
+            <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+              {/* Contenedor del icono con ajuste de tamaño responsivo */}
+              <div className="bg-primary/15 p-2.5 sm:p-3 rounded-2xl border border-primary/30 shrink-0">
+                <Settings className="text-primary w-6 h-6 sm:w-8 sm:h-8" />
               </div>
-              <div>
-                <h1 className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2">
-                  Configuración del Local{" "}
-                  <span className="text-primary font-medium text-xs px-2.5 py-0.5 bg-primary/10 rounded-full border border-primary/20">
+
+              <div className="space-y-1">
+                {/* Título y Badge con envoltura controlada para móviles */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+                    Configuración del Local
+                  </h1>
+                  <span className="text-primary font-medium text-[10px] sm:text-xs px-2.5 py-0.5 bg-primary/10 rounded-full border border-primary/20 tracking-wider">
                     Admin Panel
                   </span>
-                </h1>
+                </div>
+
                 <p className="text-xs text-muted-foreground font-medium">
                   Administra la información general y los accesos de tu equipo
                 </p>

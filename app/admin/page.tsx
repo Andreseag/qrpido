@@ -86,12 +86,12 @@ export default function AdminDashboardPage() {
               />
 
               {/* Tarjetas de Métricas Financieras */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10">
                 <MetricCard
                   title="Ventas Totales"
                   value={`$${totalRevenue.toLocaleString()}`}
                   subtitle="Ingresos del período"
-                  icon={<DollarSign className="w-7 h-7" />}
+                  icon={<DollarSign className="w-6 h-6 sm:w-7 sm:h-7" />}
                   trendIcon={<TrendingUp size={14} />}
                   trendColorClass="text-success"
                   iconContainerClass="bg-success/10 border-success/20 text-success"
@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
                   title="Total Pedidos"
                   value={totalOrdersCount}
                   subtitle="Órdenes en el período"
-                  icon={<ReceiptText className="w-7 h-7" />}
+                  icon={<ReceiptText className="w-6 h-6 sm:w-7 sm:h-7" />}
                   trendIcon={<ShoppingBag size={14} />}
                   trendColorClass="text-primary"
                   iconContainerClass="bg-primary/10 border-primary/20 text-primary"
@@ -111,7 +111,7 @@ export default function AdminDashboardPage() {
                   title="Ticket Promedio"
                   value={`$${Math.round(averageTicket).toLocaleString()}`}
                   subtitle="Por orden de compra"
-                  icon={<DollarSign className="w-7 h-7" />}
+                  icon={<DollarSign className="w-6 h-6 sm:w-7 sm:h-7" />}
                   trendIcon={<TrendingUp size={14} />}
                   trendColorClass="text-info"
                   iconContainerClass="bg-info/10 border-info/20 text-info"
@@ -121,7 +121,7 @@ export default function AdminDashboardPage() {
                   title="Utilidad Neta Real"
                   value={`$${totalNetProfit.toLocaleString()}`}
                   subtitle="Ganancia neta estimada"
-                  icon={<DollarSign className="w-7 h-7" />}
+                  icon={<DollarSign className="w-6 h-6 sm:w-7 sm:h-7" />}
                   trendIcon={<TrendingUp size={14} />}
                   trendColorClass="text-success"
                   valueColorClass="text-success"
@@ -130,7 +130,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Sección Inferior */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 <TopProductsCard products={topProducts} />
                 <RecentOrdersCard orders={filteredOrders} />
               </div>

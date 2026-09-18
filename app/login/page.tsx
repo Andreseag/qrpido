@@ -21,9 +21,10 @@ export default function LoginPage() {
 
     if (error) {
       alert("Error: " + error.message);
-      setLoading(false);
+      setLoading(false); // Apagamos el loading si falla
     } else {
-      router.push("/admin");
+      // Forzamos una recarga dura para que las cookies viajen limpias al middleware
+      window.location.href = "/admin";
     }
   };
 

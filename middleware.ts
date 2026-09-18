@@ -2,10 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+  let supabaseResponse = NextResponse.next({
+    request,
   });
 
   const supabase = createServerClient(
@@ -17,16 +15,14 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+          supabaseResponse = NextResponse.next({
+            request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
@@ -37,18 +33,25 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 🔒 Lógica de redirección de QRPido:
-  if (!user && request.nextUrl.pathname === "/") {
-    return NextResponse.redirect(new URL("/login", request.url));
+  const url = request.nextUrl.clone();
+  const pathname = url.pathname;
+
+  // 🚀 1. Si YA estás logueado e intentas entrar a /login, te redirige a /admin
+  if (user && pathname === "/login") {
+    url.pathname = "/admin";
+    return NextResponse.redirect(url);
   }
 
-  if (user && request.nextUrl.pathname === "/") {
-    return NextResponse.redirect(new URL("/admin", request.url));
+  // 🔒 2. Si NO estás logueado e intentas entrar a /admin, te manda al login
+  if (!user && pathname.startsWith("/admin")) {
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
   }
 
-  return response;
+  return supabaseResponse;
 }
 
 export const config = {
-  matcher: ["/"],
+  // Ahora el middleware vigila tanto /admin como /login (y tus páginas públicas siguen intactas)
+  matcher: ["/admin", "/admin/:path*", "/login", "/"],
 };

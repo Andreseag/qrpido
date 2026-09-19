@@ -10,6 +10,57 @@ interface TableCardProps {
   onDelete: (id: number) => void;
 }
 
+// 🎨 Helper para asignar colores y etiquetas coherentes según el estado de la ronda
+const getOrderStateConfig = (state: string) => {
+  const normalized = state?.toLowerCase() || "";
+
+  switch (normalized) {
+    case "pending":
+    case "pendiente":
+      return {
+        label: "Pendiente",
+        className:
+          "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
+      };
+    case "preparing":
+    case "cooking":
+    case "en_cocina":
+    case "preparando":
+      return {
+        label: "En Cocina",
+        className:
+          "bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20",
+      };
+    case "ready":
+    case "listo":
+      return {
+        label: "Listo",
+        className:
+          "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
+      };
+    case "delivered":
+    case "served":
+    case "entregado":
+      return {
+        label: "Entregado",
+        className:
+          "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20",
+      };
+    case "cancelled":
+    case "cancelado":
+      return {
+        label: "Cancelado",
+        className:
+          "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
+      };
+    default:
+      return {
+        label: state,
+        className: "bg-primary/10 text-primary border border-primary/20",
+      };
+  }
+};
+
 export function TableCard({
   table,
   tableOrders,
@@ -68,27 +119,33 @@ export function TableCard({
               </span>
             </div>
             <div className="space-y-1.5 pt-1 max-h-24 overflow-y-auto">
-              {tableOrders.map((order, rIdx) => (
-                <div
-                  key={order.id}
-                  className="text-[11px] bg-surface/80 p-1.5 rounded-lg border border-border">
-                  <div className="flex justify-between text-muted-foreground font-bold mb-0.5">
-                    <span>Ronda #{rIdx + 1}</span>
-                    <span className="uppercase text-[9px] text-primary bg-primary/10 px-1 rounded">
-                      {order.state}
-                    </span>
-                  </div>
-                  {order.items?.map((item, iIdx) => (
-                    <div
-                      key={iIdx}
-                      className="flex justify-between text-foreground">
-                      <span className="truncate pr-2">
-                        {item.quantity}x {item.name}
+              {tableOrders.map((order, rIdx) => {
+                const stateConfig = getOrderStateConfig(order.state);
+                return (
+                  <div
+                    key={order.id}
+                    className="text-[11px] bg-surface/80 p-2 rounded-xl border border-border space-y-1">
+                    <div className="flex justify-between items-center font-bold mb-0.5">
+                      <span className="text-muted-foreground">
+                        Ronda #{rIdx + 1}
+                      </span>
+                      <span
+                        className={`uppercase text-[9px] font-black px-2 py-0.5 rounded-md ${stateConfig.className}`}>
+                        {stateConfig.label}
                       </span>
                     </div>
-                  ))}
-                </div>
-              ))}
+                    {order.items?.map((item, iIdx) => (
+                      <div
+                        key={iIdx}
+                        className="flex justify-between text-foreground font-medium">
+                        <span className="truncate pr-2">
+                          {item.quantity}x {item.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : (

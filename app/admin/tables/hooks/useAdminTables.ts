@@ -65,7 +65,7 @@ export function useAdminTables() {
       .from("orders")
       .select("id, table_id, total_price, state, items, note, created_at")
       .eq("restaurant_id", selectedRestaurantId)
-      .in("state", ["pendiente", "preparado", "listo", "entregado"]);
+      .in("state", ["en_cocina", "preparando", "listo", "entregado"]);
     if (ordersData) setActiveOrders(ordersData as ActiveOrder[]);
 
     // 3. Productos del menú
@@ -179,7 +179,7 @@ export function useAdminTables() {
             restaurant_id: selectedRestaurantId,
             table_id: tableId,
             order_type: "mesa",
-            state: "pendiente",
+            state: "en_cocina",
             items: cart,
             total_price: totalPrice,
             note,

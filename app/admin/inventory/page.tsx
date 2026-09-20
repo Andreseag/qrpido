@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react"; // <-- Importamos useState
 import {
   Package,
   Plus,
@@ -10,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useInventory } from "./hooks/useInventory";
+import { ConfirmModal } from "@/app/components/ConfirmModal/ConfirmModal";
 
 export default function AdminInventoryPage() {
   const {
@@ -29,6 +31,25 @@ export default function AdminInventoryPage() {
     handleSubmitProduct,
     deleteProduct,
   } = useInventory();
+
+  // 🟢 Estados para el Modal de Confirmación de Eliminación
+  const [itemToDelete, setItemToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      setIsDeleting(true);
+      await deleteProduct(itemToDelete.id);
+      setItemToDelete(null);
+      setIsDrawerOpen(false); // Por si estaba abierto el drawer
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const getCategoryName = (categoryId: string | null) => {
     if (!categoryId) return null;
@@ -180,7 +201,9 @@ export default function AdminInventoryPage() {
                       <Pencil className="w-4 h-4" /> Editar
                     </button>
                     <button
-                      onClick={() => deleteProduct(item.id)}
+                      onClick={() =>
+                        setItemToDelete({ id: item.id, name: item.name })
+                      }
                       className="py-2.5 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 text-xs font-bold"
                       title="Eliminar producto">
                       <Trash2 className="w-4 h-4" />
@@ -264,7 +287,12 @@ export default function AdminInventoryPage() {
                               <Pencil className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => deleteProduct(item.id)}
+                              onClick={() =>
+                                setItemToDelete({
+                                  id: item.id,
+                                  name: item.name,
+                                })
+                              }
                               className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl transition-colors cursor-pointer"
                               title="Eliminar producto">
                               <Trash2 className="w-4 h-4" />
@@ -471,10 +499,12 @@ export default function AdminInventoryPage() {
                 {editingProduct && (
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsDrawerOpen(false);
-                      deleteProduct(editingProduct.id);
-                    }}
+                    onClick={() =>
+                      setItemToDelete({
+                        id: editingProduct.id,
+                        name: editingProduct.name,
+                      })
+                    }
                     className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer transition-all flex items-center justify-center gap-2">
                     <Trash2 className="w-4 h-4" /> Eliminar Producto
                   </button>
@@ -484,6 +514,19 @@ export default function AdminInventoryPage() {
           </div>
         </div>
       )}
+
+      {/* 🟢 Modal de Confirmación Global */}
+      <ConfirmModal
+        isOpen={!!itemToDelete}
+        title="¿Eliminar este plato?"
+        description={`Estás a punto de eliminar permanentemente a "${itemToDelete?.name}". Esta acción no se puede deshacer y se removerá de tu menú.`}
+        confirmText="Sí, eliminar"
+        cancelText="Cancelar"
+        type="danger"
+        loading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setItemToDelete(null)}
+      />
     </div>
   );
 }

@@ -146,12 +146,6 @@ export function useInventory() {
 
   // 🟢 Nueva función para eliminar productos
   const deleteProduct = async (id: string) => {
-    if (
-      !window.confirm("¿Estás seguro de que deseas eliminar este producto?")
-    ) {
-      return;
-    }
-
     const { error } = await supabase.from("products").delete().eq("id", id);
 
     if (error) {

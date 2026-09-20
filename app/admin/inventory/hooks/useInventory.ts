@@ -58,10 +58,8 @@ export function useInventory() {
   const [toast, setToast] = useState<Toast | null>(null);
   const [formData, setFormData] = useState<ProductFormData>(emptyFormData);
 
-  // Selección persistida globalmente (Context + localStorage)
   const { selectedRestaurantId } = useSelectedRestaurant();
 
-  // Escuchar cambios en el restaurante activo para recargar inventario y categorías
   useEffect(() => {
     if (selectedRestaurantId) {
       fetchInventory(selectedRestaurantId);
@@ -97,7 +95,6 @@ export function useInventory() {
     setLoading(false);
   };
 
-  // Categorías del Menú Digital — para asignar cada producto a una sección
   const fetchCategories = async (restId: string) => {
     const { data, error } = await supabase
       .from("menu_categories")
@@ -108,7 +105,6 @@ export function useInventory() {
     if (!error && data) setCategories(data);
   };
 
-  // Sube la foto del producto al bucket público del Menú Digital
   const uploadProductImage = async (
     restaurantId: string,
     file: File,
@@ -148,6 +144,28 @@ export function useInventory() {
     }
   };
 
+  // 🟢 Nueva función para eliminar productos
+  const deleteProduct = async (id: string) => {
+    if (
+      !window.confirm("¿Estás seguro de que deseas eliminar este producto?")
+    ) {
+      return;
+    }
+
+    const { error } = await supabase.from("products").delete().eq("id", id);
+
+    if (error) {
+      showToast("Error al eliminar el producto: " + error.message, "error");
+    } else {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      if (editingProduct?.id === id) {
+        setIsDrawerOpen(false);
+        setEditingProduct(null);
+      }
+      showToast("¡Producto eliminado con éxito!");
+    }
+  };
+
   const openCreateDrawer = () => {
     setEditingProduct(null);
     setFormData(emptyFormData);
@@ -178,8 +196,6 @@ export function useInventory() {
     const priceNum = parseFloat(formData.price);
     const costNum = parseFloat(formData.cost) || 0;
 
-    // Si hay una foto nueva seleccionada, se sube primero; si no, se
-    // conserva la URL que ya tenía el producto (o null si nunca tuvo).
     let imageUrl = formData.imageUrl;
     if (formData.imageFile) {
       try {
@@ -265,6 +281,7 @@ export function useInventory() {
     fetchInventory: () =>
       selectedRestaurantId && fetchInventory(selectedRestaurantId),
     toggleStock,
+    deleteProduct,
     openCreateDrawer,
     openEditDrawer,
     handleSubmitProduct,

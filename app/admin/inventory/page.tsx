@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   AlertCircle,
   ImageIcon,
+  Trash2,
 } from "lucide-react";
 import { useInventory } from "./hooks/useInventory";
 
@@ -26,6 +27,7 @@ export default function AdminInventoryPage() {
     openCreateDrawer,
     openEditDrawer,
     handleSubmitProduct,
+    deleteProduct,
   } = useInventory();
 
   const getCategoryName = (categoryId: string | null) => {
@@ -96,7 +98,7 @@ export default function AdminInventoryPage() {
         </div>
       ) : (
         <>
-          {/* 🟢 Vista Móvil: Tarjetas (visible solo en pantallas pequeñas) */}
+          {/* 🟢 Vista Móvil: Tarjetas */}
           <div className="block md:hidden space-y-4">
             {products.map((item) => {
               const utilidad = item.price - (item.cost || 0);
@@ -171,11 +173,17 @@ export default function AdminInventoryPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-1">
+                  <div className="flex items-center gap-2 pt-1">
                     <button
                       onClick={() => openEditDrawer(item)}
-                      className="w-full py-2.5 bg-background hover:bg-border text-foreground border border-border rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 text-xs font-bold">
-                      <Pencil className="w-4 h-4" /> Editar Producto
+                      className="flex-1 py-2.5 bg-background hover:bg-border text-foreground border border-border rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 text-xs font-bold">
+                      <Pencil className="w-4 h-4" /> Editar
+                    </button>
+                    <button
+                      onClick={() => deleteProduct(item.id)}
+                      className="py-2.5 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2 text-xs font-bold"
+                      title="Eliminar producto">
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -183,7 +191,7 @@ export default function AdminInventoryPage() {
             })}
           </div>
 
-          {/* 🟢 Vista Escritorio: Tabla clásica (visible en md en adelante) */}
+          {/* 🟢 Vista Escritorio: Tabla clásica */}
           <div className="hidden md:block bg-surface rounded-3xl border border-border overflow-hidden shadow-2xl">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -247,22 +255,30 @@ export default function AdminInventoryPage() {
                             ({margen}%)
                           </span>
                         </td>
-                        <td className="px-6 py-5 text-right flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => openEditDrawer(item)}
-                            className="p-2 bg-background hover:bg-border text-foreground border border-border rounded-xl transition-colors cursor-pointer"
-                            title="Editar producto">
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => toggleStock(item.id, item.stock)}
-                            className={`px-4 py-2 rounded-xl font-black text-[10px] cursor-pointer ${
-                              item.stock
-                                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                                : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
-                            }`}>
-                            {item.stock ? "DISPONIBLE" : "AGOTADO"}
-                          </button>
+                        <td className="px-6 py-5 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => openEditDrawer(item)}
+                              className="p-2 bg-background hover:bg-border text-foreground border border-border rounded-xl transition-colors cursor-pointer"
+                              title="Editar producto">
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => deleteProduct(item.id)}
+                              className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 rounded-xl transition-colors cursor-pointer"
+                              title="Eliminar producto">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => toggleStock(item.id, item.stock)}
+                              className={`px-4 py-2 rounded-xl font-black text-[10px] cursor-pointer ${
+                                item.stock
+                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                  : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                              }`}>
+                              {item.stock ? "DISPONIBLE" : "AGOTADO"}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -310,7 +326,7 @@ export default function AdminInventoryPage() {
                 />
               </div>
 
-              {/* Grid responsivo para precio y costo */}
+              {/* Grid precio y costo */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold uppercase text-muted-foreground block mb-2">
@@ -378,7 +394,7 @@ export default function AdminInventoryPage() {
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Ej: Carne de res, queso cheddar, lechuga, tomate, salsa especial de la casa"
+                  placeholder="Ej: Carne de res, queso cheddar, lechuga, tomate..."
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
@@ -440,16 +456,30 @@ export default function AdminInventoryPage() {
                 </label>
               </div>
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground py-4 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer transition-all shadow-lg shadow-primary/10">
-                {saving
-                  ? "Guardando..."
-                  : editingProduct
-                    ? "Actualizar Producto"
-                    : "Guardar Producto"}
-              </button>
+              <div className="space-y-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground py-4 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer transition-all shadow-lg shadow-primary/10">
+                  {saving
+                    ? "Guardando..."
+                    : editingProduct
+                      ? "Actualizar Producto"
+                      : "Guardar Producto"}
+                </button>
+
+                {editingProduct && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsDrawerOpen(false);
+                      deleteProduct(editingProduct.id);
+                    }}
+                    className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider cursor-pointer transition-all flex items-center justify-center gap-2">
+                    <Trash2 className="w-4 h-4" /> Eliminar Producto
+                  </button>
+                )}
+              </div>
             </form>
           </div>
         </div>

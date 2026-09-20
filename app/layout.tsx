@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./providers/ThemeProvider";
@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "QRPido | Sistema de Gestión y Pedidos para Restaurantes",
   description:
     "Optimiza la gestión de tu restaurante, administra menús digitales con códigos QR, controla múltiples sucursales y fideliza a tus clientes con campañas automatizadas.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Mi App",
+  },
   keywords: [
     "restaurantes",
     "menú digital",
@@ -31,6 +36,10 @@ export const metadata: Metadata = {
       "La plataforma todo en uno para optimizar pedidos, menús y administración de restaurantes.",
     type: "website",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({

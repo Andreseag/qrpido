@@ -174,6 +174,7 @@ export default function AdminSidebar() {
           <div className="flex items-center gap-3 overflow-hidden flex-1">
             <div className="bg-primary p-2.5 rounded-2xl text-primary-foreground font-black shrink-0">
               <Store className="w-6 h-6" />
+              {/* <img src="/icons/icon-512x512.png" className="w-6 h-6" /> */}
             </div>
             <div className="overflow-hidden flex-1">
               {loading ? (

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Mi App",
+    title: "QRPido",
   },
   keywords: [
     "restaurantes",

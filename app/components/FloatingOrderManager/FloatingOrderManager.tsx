@@ -142,8 +142,9 @@ export default function FloatingOrderManager({
                 <div className="flex items-center gap-1 ml-2 shrink-0">
                   <button
                     onClick={openNewDraft}
-                    className="hidden md:flex items-center gap-1 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-bold transition-all cursor-pointer">
-                    <Plus className="w-3.5 h-3.5" /> Nuevo
+                    className="flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-bold transition-all cursor-pointer">
+                    <Plus className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Nuevo</span>
                   </button>
                   <button
                     type="button"

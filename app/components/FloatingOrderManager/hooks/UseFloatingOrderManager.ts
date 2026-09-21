@@ -2,7 +2,7 @@
 
 import { useSelectedRestaurant } from "@/app/context/Selectedrestaurantcontext";
 import { supabase } from "@/app/lib/supabase";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Product {
   id: string;
@@ -49,6 +49,8 @@ interface FloatingOrderManagerProps {
   initialClientData?: { name: string; phone: string } | null;
 }
 
+const STORAGE_PREFIX = "floating_order_drafts_";
+
 export function UseFloatingOrderManager({
   initialClientData,
 }: FloatingOrderManagerProps) {
@@ -56,17 +58,77 @@ export function UseFloatingOrderManager({
 
   const [drafts, setDrafts] = useState<OrderDraft[]>([]);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
+  const [isMinimized, setIsMinimized] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [loadingTables, setLoadingTables] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
 
-  // use
+  const loadedRestaurantRef = useRef<string | null>(null);
+  const processedClientRef = useRef<string | null>(null);
+
   const showToast = (message: string, type: Toast["type"] = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
   };
+
+  // 🛠️ Función auxiliar para guardar explícitamente en localStorage
+  const saveToLocalStorage = (
+    currentDrafts: OrderDraft[],
+    currentActiveId: string | null,
+  ) => {
+    console.log("zasadasd");
+    if (!selectedRestaurantId || typeof window === "undefined") return;
+    try {
+      localStorage.setItem(
+        `${STORAGE_PREFIX}${selectedRestaurantId}`,
+        JSON.stringify(currentDrafts),
+      );
+      if (currentActiveId) {
+        localStorage.setItem(
+          `${STORAGE_PREFIX}active_${selectedRestaurantId}`,
+          currentActiveId,
+        );
+      } else {
+        localStorage.removeItem(
+          `${STORAGE_PREFIX}active_${selectedRestaurantId}`,
+        );
+      }
+    } catch (e) {
+      console.error("Error saving to localStorage", e);
+    }
+  };
+
+  // 1. Cargar borradores al cambiar o tener disponible el restaurante
+  useEffect(() => {
+    if (!selectedRestaurantId) return;
+    if (loadedRestaurantRef.current === selectedRestaurantId) return;
+    loadedRestaurantRef.current = selectedRestaurantId;
+
+    try {
+      const savedDrafts = localStorage.getItem(
+        `${STORAGE_PREFIX}${selectedRestaurantId}`,
+      );
+      const savedActive = localStorage.getItem(
+        `${STORAGE_PREFIX}active_${selectedRestaurantId}`,
+      );
+
+      if (savedDrafts) {
+        const parsed = JSON.parse(savedDrafts);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setDrafts(parsed);
+          if (savedActive && parsed.some((d) => d.draftId === savedActive)) {
+            setActiveDraftId(savedActive);
+          } else {
+            setActiveDraftId(parsed[0].draftId);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Error loading drafts", e);
+    }
+  }, [selectedRestaurantId]);
 
   useEffect(() => {
     if (selectedRestaurantId) {
@@ -75,8 +137,27 @@ export function UseFloatingOrderManager({
     }
   }, [selectedRestaurantId]);
 
+  // Manejar cliente inicial de WhatsApp
   useEffect(() => {
-    if (initialClientData && initialClientData.name) {
+    if (!initialClientData || !initialClientData.name || !selectedRestaurantId)
+      return;
+
+    const clientKey = `${initialClientData.phone}_${initialClientData.name}`;
+    if (processedClientRef.current === clientKey) return;
+    processedClientRef.current = clientKey;
+
+    setDrafts((prev) => {
+      const existing = prev.find(
+        (d) =>
+          d.customerPhone === initialClientData.phone &&
+          initialClientData.phone !== "",
+      );
+      if (existing) {
+        setActiveDraftId(existing.draftId);
+        saveToLocalStorage(prev, existing.draftId);
+        return prev;
+      }
+
       const newDraft: OrderDraft = {
         draftId: Date.now().toString(),
         customerName: initialClientData.name,
@@ -92,14 +173,30 @@ export function UseFloatingOrderManager({
         note: "Pedido originado desde WhatsApp",
         tempProduct: "",
       };
-      setDrafts((prev) => [...prev, newDraft]);
-      setActiveDraftId(newDraft.draftId);
 
-      if (initialClientData.phone && selectedRestaurantId) {
-        checkCustomerOnServer(newDraft.draftId, initialClientData.phone);
-      }
-    }
+      const nextDrafts = [...prev, newDraft];
+      setActiveDraftId(newDraft.draftId);
+      saveToLocalStorage(nextDrafts, newDraft.draftId);
+      return nextDrafts;
+    });
+
+    setIsMinimized(false);
   }, [initialClientData, selectedRestaurantId]);
+
+  // Asegurar que activeDraftId sea válido si la lista cambia
+  useEffect(() => {
+    if (
+      drafts.length > 0 &&
+      (!activeDraftId || !drafts.some((d) => d.draftId === activeDraftId))
+    ) {
+      const newActive = drafts[0].draftId;
+      setActiveDraftId(newActive);
+      saveToLocalStorage(drafts, newActive);
+    } else if (drafts.length === 0) {
+      setActiveDraftId(null);
+      saveToLocalStorage([], null);
+    }
+  }, [drafts, activeDraftId]);
 
   const fetchProducts = async () => {
     setLoadingProducts(true);
@@ -133,26 +230,22 @@ export function UseFloatingOrderManager({
       .eq("phone", phone)
       .single();
 
-    if (data) {
-      setDrafts((prev) =>
-        prev.map((d) =>
-          d.draftId === draftId
-            ? {
-                ...d,
-                customerId: data.id,
-                customerName: data.name,
-                customerPersistentNotes: data.notes || "",
-              }
-            : d,
-        ),
+    setDrafts((prev) => {
+      const next = prev.map((d) =>
+        d.draftId === draftId
+          ? {
+              ...d,
+              customerId: data ? data.id : null,
+              customerName: data ? data.name : d.customerName,
+              customerPersistentNotes: data
+                ? data.notes || ""
+                : d.customerPersistentNotes,
+            }
+          : d,
       );
-    } else {
-      setDrafts((prev) =>
-        prev.map((d) =>
-          d.draftId === draftId ? { ...d, customerId: null } : d,
-        ),
-      );
-    }
+      saveToLocalStorage(next, activeDraftId);
+      return next;
+    });
   };
 
   const openNewDraft = () => {
@@ -171,33 +264,54 @@ export function UseFloatingOrderManager({
       note: "",
       tempProduct: "",
     };
-    setDrafts((prev) => [...prev, newDraft]);
-    setActiveDraftId(newDraft.draftId);
+    setDrafts((prev) => {
+      const next = [...prev, newDraft];
+      setActiveDraftId(newDraft.draftId);
+      saveToLocalStorage(next, newDraft.draftId);
+      return next;
+    });
+    setIsMinimized(false);
   };
 
-  // Al cerrar una pestaña: si era la activa, salta a la última que quede
-  // (o cierra el panel entero si no queda ninguna).
   const closeDraft = (draftId: string) => {
+    if (!draftId) return;
+
     setDrafts((prev) => {
-      const next = prev.filter((d) => d.draftId !== draftId);
+      // 1. Filtrar usando el estado más reciente (prev)
+      const nextDrafts = prev.filter((d) => d.draftId !== draftId);
+
+      // 2. Calcular el nuevo ID activo de forma segura
+      let nextActiveId = activeDraftId;
       if (activeDraftId === draftId) {
-        setActiveDraftId(
-          next.length > 0 ? next[next.length - 1].draftId : null,
-        );
+        nextActiveId =
+          nextDrafts.length > 0
+            ? nextDrafts[nextDrafts.length - 1].draftId
+            : null;
       }
-      return next;
+
+      // 3. Actualizar el estado activo
+      setActiveDraftId(nextActiveId);
+
+      // 4. Guardar explícitamente en localStorage con los datos frescos
+      saveToLocalStorage(nextDrafts, nextActiveId);
+
+      return nextDrafts;
     });
   };
 
   const updateDraft = (draftId: string, updates: Partial<OrderDraft>) => {
-    setDrafts((prev) =>
-      prev.map((d) => (d.draftId === draftId ? { ...d, ...updates } : d)),
-    );
+    setDrafts((prev) => {
+      const next = prev.map((d) =>
+        d.draftId === draftId ? { ...d, ...updates } : d,
+      );
+      saveToLocalStorage(next, activeDraftId);
+      return next;
+    });
   };
 
   const addItemToDraft = (draftId: string, product: Product) => {
-    setDrafts((prev) =>
-      prev.map((d) => {
+    setDrafts((prev) => {
+      const next = prev.map((d) => {
         if (d.draftId !== draftId) return d;
         const existing = d.selectedItems.find(
           (i) => i.productId === product.id,
@@ -227,13 +341,15 @@ export function UseFloatingOrderManager({
             },
           ],
         };
-      }),
-    );
+      });
+      saveToLocalStorage(next, activeDraftId);
+      return next;
+    });
   };
 
   const removeItemFromDraft = (draftId: string, productId: string) => {
-    setDrafts((prev) =>
-      prev.map((d) => {
+    setDrafts((prev) => {
+      const next = prev.map((d) => {
         if (d.draftId !== draftId) return d;
         return {
           ...d,
@@ -241,8 +357,10 @@ export function UseFloatingOrderManager({
             (i) => i.productId !== productId,
           ),
         };
-      }),
-    );
+      });
+      saveToLocalStorage(next, activeDraftId);
+      return next;
+    });
   };
 
   const submitOrder = async (draft: OrderDraft) => {
@@ -327,7 +445,7 @@ export function UseFloatingOrderManager({
       showToast("Error al crear el pedido: " + error.message, "error");
     } else {
       showToast("¡Pedido creado y cliente registrado/actualizado con éxito!");
-      closeDraft(draft.draftId);
+      closeDraft(draft.draftId); // Esto ahora limpia y actualiza el localStorage automáticamente
     }
   };
 
@@ -346,9 +464,14 @@ export function UseFloatingOrderManager({
     loadingProducts,
     loadingTables,
     drafts,
-    setActiveDraftId,
+    setActiveDraftId: (id: string | null) => {
+      setActiveDraftId(id);
+      saveToLocalStorage(drafts, id);
+    },
     activeDraftId,
     closeDraft,
     checkCustomerOnServer,
+    isMinimized,
+    setIsMinimized,
   };
 }

@@ -2,9 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Nombre Completo de tu App",
+    name: "QRPido",
     short_name: "MiApp",
-    description: "Descripción corta de lo que hace tu aplicación",
+    description:
+      "Optimiza la gestión de tu restaurante, administra menús digitales con códigos QR, controla múltiples sucursales y fideliza a tus clientes con campañas automatizadas.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

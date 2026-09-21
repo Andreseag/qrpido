@@ -295,7 +295,7 @@ export default function FloatingOrderManager({
                                     : "Seleccionar mesa..."}
                               </option>
                               {tables.map((t) => (
-                                <option key={t.id} value={t.number}>
+                                <option key={t.id} value={t.id}>
                                   Mesa #{t.number}
                                 </option>
                               ))}

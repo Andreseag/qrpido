@@ -78,7 +78,6 @@ export function UseFloatingOrderManager({
     currentDrafts: OrderDraft[],
     currentActiveId: string | null,
   ) => {
-    console.log("zasadasd");
     if (!selectedRestaurantId || typeof window === "undefined") return;
     try {
       localStorage.setItem(

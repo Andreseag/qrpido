@@ -19,7 +19,6 @@ export function RoleGuard({
 
   useEffect(() => {
     if (!loading) {
-      console.log("RoleGuard: role =", role, "allowedRoles =", allowedRoles);
       if (!role) {
         // Si no tiene rol o no está logueado, al login
         router.push("/login");

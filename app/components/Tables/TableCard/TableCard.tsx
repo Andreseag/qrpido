@@ -15,43 +15,23 @@ const getOrderStateConfig = (state: string) => {
   const normalized = state?.toLowerCase() || "";
 
   switch (normalized) {
-    case "pending":
-    case "pendiente":
-      return {
-        label: "Pendiente",
-        className:
-          "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20",
-      };
-    case "preparing":
-    case "cooking":
     case "en_cocina":
-    case "preparando":
       return {
         label: "En Cocina",
         className:
           "bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20",
       };
-    case "ready":
+    case "preparando":
+      return {
+        label: "Preparando",
+        className:
+          "bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20",
+      };
     case "listo":
       return {
         label: "Listo",
         className:
           "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
-      };
-    case "delivered":
-    case "served":
-    case "entregado":
-      return {
-        label: "Entregado",
-        className:
-          "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20",
-      };
-    case "cancelled":
-    case "cancelado":
-      return {
-        label: "Cancelado",
-        className:
-          "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20",
       };
     default:
       return {

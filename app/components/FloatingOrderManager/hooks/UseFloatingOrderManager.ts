@@ -24,6 +24,7 @@ interface OrderDraft {
   customerPersistentNotes: string;
   orderType: "mesa" | "domicilio";
   tableNumber: string;
+  tableId: string;
   address: string;
   paymentMethod: string;
   cashGiven: string;
@@ -165,6 +166,7 @@ export function UseFloatingOrderManager({
         customerPersistentNotes: "",
         orderType: "domicilio",
         tableNumber: "",
+        tableId: "",
         address: "",
         paymentMethod: "efectivo",
         cashGiven: "",
@@ -256,6 +258,7 @@ export function UseFloatingOrderManager({
       customerPersistentNotes: "",
       orderType: "mesa",
       tableNumber: "",
+      tableId: "",
       address: "",
       paymentMethod: "efectivo",
       cashGiven: "",
@@ -425,6 +428,7 @@ export function UseFloatingOrderManager({
       customer_phone: draft.customerPhone || "",
       order_type: draft.orderType,
       table_number: draft.orderType === "mesa" ? draft.tableNumber : null,
+      table_id: draft.orderType === "mesa" ? draft.tableNumber : null,
       address: draft.orderType === "domicilio" ? draft.address : null,
       payment_method:
         draft.orderType === "domicilio" ? draft.paymentMethod : "local",

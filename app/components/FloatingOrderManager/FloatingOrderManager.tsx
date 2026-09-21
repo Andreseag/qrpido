@@ -284,6 +284,7 @@ export default function FloatingOrderManager({
                               onChange={(e) =>
                                 updateDraft(activeDraft.draftId, {
                                   tableNumber: e.target.value,
+                                  tableId: e.target.value,
                                 })
                               }
                               className="w-full p-2.5 bg-background border border-border rounded-xl text-foreground outline-none focus:border-primary font-medium cursor-pointer text-xs">

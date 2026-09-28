@@ -78,6 +78,7 @@ export function useAdminDashboard() {
         .from("orders")
         .select("*")
         .eq("restaurant_id", restaurantId)
+        .eq("state", "pagado")
         .order("created_at", { ascending: false });
 
       if (ordersError) throw ordersError;

@@ -2,6 +2,11 @@
 
 import { useSelectedRestaurant } from "@/app/context/Selectedrestaurantcontext";
 import { supabase } from "@/app/lib/supabase";
+import {
+  closeCashRegister,
+  getCashRegisterStatus,
+  openCashRegister,
+} from "@/app/services/cashRegisterService";
 import { useEffect, useRef, useState } from "react";
 
 interface Product {
@@ -241,6 +246,7 @@ export function UseFloatingOrderManager({
               customerPersistentNotes: data
                 ? data.notes || ""
                 : d.customerPersistentNotes,
+              address: data.last_address,
             }
           : d,
       );
@@ -405,6 +411,7 @@ export function UseFloatingOrderManager({
             phone: draft.customerPhone,
             name: draft.customerName,
             notes: draft.customerPersistentNotes || draft.note,
+            last_address: draft.address,
           },
           { onConflict: "restaurant_id, phone" },
         )

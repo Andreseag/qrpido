@@ -14,6 +14,8 @@ import {
   Minus,
 } from "lucide-react";
 import { UseFloatingOrderManager } from "./hooks/UseFloatingOrderManager";
+import CashRegisterModal from "../CashRegisterModal/CashRegisterModal";
+import UseCashRegister from "./hooks/UseCashRegister";
 
 interface FloatingOrderManagerProps {
   isOpen?: boolean;
@@ -44,6 +46,20 @@ export default function FloatingOrderManager({
     isMinimized,
     setIsMinimized,
   } = UseFloatingOrderManager({ initialClientData });
+
+  const {
+    isCashModalOpen,
+    setIsCashModalOpen,
+    cashModalMode,
+    setCashModalMode,
+    activeCashRegister,
+    expectedAmount,
+    setExpectedAmount,
+    suggestedBase,
+    setSuggestedBase,
+    setActiveCashRegister,
+    handleCashModalSubmit,
+  } = UseCashRegister();
 
   // Estado local para el buscador de productos
   const [productSearch, setProductSearch] = useState("");
@@ -98,54 +114,60 @@ export default function FloatingOrderManager({
             /* 🔼 Contenedor principal expandido */
             <div className="fixed inset-0 z-50 flex flex-col bg-surface md:inset-auto md:bottom-6 md:right-6 md:w-[750px] md:max-h-[90vh] md:rounded-3xl md:border md:border-border md:shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
               {/* Tira de pestañas y controles superiores */}
+              {/* Tira de pestañas y controles superiores */}
               <div className="flex items-center justify-between bg-background border-b border-border px-3 pt-2">
+                {/* Pestañas de pedidos */}
                 <div className="flex items-end gap-1 overflow-x-auto scrollbar-none pt-2 flex-1">
-                  {drafts.map((draft, index) => {
-                    const isActive = draft.draftId === activeDraftId;
-                    const hasItems = draft.selectedItems.length > 0;
-                    return (
-                      <button
-                        key={draft.draftId}
-                        onClick={() => setActiveDraftId(draft.draftId)}
-                        title={draft.customerName || `Pedido ${index + 1}`}
-                        className={`group relative flex items-center gap-1.5 px-4 py-2.5 rounded-t-2xl text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-surface text-foreground border-b-2 border-primary shadow-sm"
-                            : "text-muted-foreground hover:text-foreground hover:bg-border/40"
-                        }`}>
-                        {draft.orderType === "mesa" ? (
-                          <Utensils className="w-3.5 h-3.5 shrink-0" />
-                        ) : (
-                          <MapPin className="w-3.5 h-3.5 shrink-0" />
-                        )}
-                        <span className="max-w-[100px] truncate">
-                          {draft.customerName || `Pedido ${index + 1}`}
-                        </span>
-                        {hasItems && (
-                          <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                        )}
-                        <span
-                          role="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            closeDraft(draft.draftId);
-                          }}
-                          className="ml-1 p-1 rounded-md hover:bg-border/80 text-muted-foreground hover:text-foreground shrink-0">
-                          <X className="w-3.5 h-3.5" />
-                        </span>
-                      </button>
-                    );
-                  })}
+                  {/* ... tus pestañas de borradores actuales ... */}
                 </div>
 
-                {/* Controles superiores derechos (Nuevo + Minimizar) */}
-                <div className="flex items-center gap-1 ml-2 shrink-0">
+                {/* Controles superiores derechos: Estado de Caja + Nuevo + Minimizar */}
+                <div className="flex items-center gap-2 ml-2 shrink-0 pb-2">
+                  {/* 🟢 Indicador / Botón de Caja */}
+                  {activeCashRegister ? (
+                    <button
+                      onClick={() => {
+                        // Si ya hay caja abierta, hacer clic permite ver el cierre o arqueo
+                        setCashModalMode("close");
+                        // Aquí calcularías el expectedAmount consultando las ventas en efectivo del día
+                        setExpectedAmount(180000); // Ejemplo de cálculo teóricas
+                        setIsCashModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-success/10 hover:bg-success/20 text-success border border-success/20 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                      title="Caja abierta. Click para ver cierre.">
+                      <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                      <span className="hidden sm:inline">Caja Abierta</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setCashModalMode("open");
+                        setIsCashModalOpen(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-danger/10 hover:bg-danger/20 text-danger border border-danger/20 rounded-xl text-xs font-bold transition-all cursor-pointer animate-bounce"
+                      title="La caja está cerrada. Click para abrir.">
+                      <span className="w-2 h-2 rounded-full bg-danger" />
+                      <span>Abrir Caja</span>
+                    </button>
+                  )}
+
+                  {/* Botón Nuevo Pedido */}
                   <button
-                    onClick={openNewDraft}
+                    onClick={() => {
+                      // Validación opcional: Si no hay caja abierta, forzar apertura antes de dejar crear pedidos
+                      if (!activeCashRegister) {
+                        setCashModalMode("open");
+                        setIsCashModalOpen(true);
+                        return;
+                      }
+                      openNewDraft();
+                    }}
                     className="flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-bold transition-all cursor-pointer">
                     <Plus className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Nuevo</span>
                   </button>
+
+                  {/* Botón Minimizar */}
                   <button
                     type="button"
                     onClick={() => setIsMinimized(true)}
@@ -536,6 +558,16 @@ export default function FloatingOrderManager({
           )}
         </>
       )}
+
+      {/* Al final de tu componente FloatingOrderManager */}
+      <CashRegisterModal
+        isOpen={isCashModalOpen}
+        mode={cashModalMode}
+        expectedAmount={expectedAmount}
+        suggestedBase={suggestedBase}
+        onClose={() => setIsCashModalOpen(false)}
+        onSubmit={handleCashModalSubmit}
+      />
     </>
   );
 }

@@ -10,7 +10,7 @@ export async function getMenuData(
 ): Promise<PublicMenuData | null> {
   const { data: restaurant, error: restaurantError } = await supabaseAdmin
     .from("restaurants")
-    .select("id, name, menu_is_public")
+    .select("id, name, menu_is_public, theme_palette, menu_template")
     .eq("slug", slug)
     .maybeSingle();
 
@@ -51,5 +51,8 @@ export async function getMenuData(
     restaurantName: restaurant.name,
     categories,
     uncategorized,
+    themePalette: restaurant.theme_palette,
+    menuTemplate: restaurant.menu_template,
+    logoUrl: "",
   };
 }

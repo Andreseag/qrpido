@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/app/lib/supabase";
-import { useActiveRestaurant } from "@/app/hooks/Useactiverestaurant";
 import { MenuCategory } from "../types";
+import { useActiveRestaurant } from "@/app/hooks/Useactiverestaurant";
 
 export function useMenuDigital() {
   const {
@@ -15,9 +15,13 @@ export function useMenuDigital() {
 
   const [slug, setSlug] = useState("");
   const [isMenuPublic, setIsMenuPublic] = useState(true);
+  const [themePalette, setThemePalette] = useState("amber_classic");
+  const [menuTemplate, setMenuTemplate] = useState("classic");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [loadingMenu, setLoadingMenu] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const fetchAll = useCallback(async (restaurantId: string) => {
     setLoadingMenu(true);
@@ -25,7 +29,9 @@ export function useMenuDigital() {
       await Promise.all([
         supabase
           .from("restaurants")
-          .select("slug, menu_is_public")
+          .select(
+            "slug, menu_is_public, theme_palette, menu_template, logo_url",
+          )
           .eq("id", restaurantId)
           .maybeSingle(),
         supabase
@@ -38,6 +44,9 @@ export function useMenuDigital() {
     if (restaurantData) {
       setSlug(restaurantData.slug || "");
       setIsMenuPublic(restaurantData.menu_is_public ?? true);
+      setThemePalette(restaurantData.theme_palette || "amber_classic");
+      setMenuTemplate(restaurantData.menu_template || "classic");
+      setLogoUrl(restaurantData.logo_url || null);
     }
     if (categoriesData) setCategories(categoriesData as MenuCategory[]);
     setLoadingMenu(false);
@@ -84,6 +93,74 @@ export function useMenuDigital() {
         .eq("id", activeRestaurant.id);
       if (!error) setIsMenuPublic(value);
       return !error;
+    },
+    [activeRestaurant],
+  );
+
+  const saveThemePalette = useCallback(
+    async (paletteId: string) => {
+      if (!activeRestaurant) return false;
+      // Optimista: se ve el cambio de inmediato en el selector
+      const previous = themePalette;
+      setThemePalette(paletteId);
+
+      const { data, error } = await supabase
+        .from("restaurants")
+        .update({ theme_palette: paletteId })
+        .eq("id", activeRestaurant.id)
+        .select("id");
+
+      if (error || !data || data.length === 0) {
+        setThemePalette(previous); // revertir: no se guardó
+        return false;
+      }
+
+      return !error;
+    },
+    [activeRestaurant, themePalette],
+  );
+
+  const saveMenuTemplate = useCallback(
+    async (templateId: string) => {
+      if (!activeRestaurant) return false;
+      setMenuTemplate(templateId);
+      const { error } = await supabase
+        .from("restaurants")
+        .update({ menu_template: templateId })
+        .eq("id", activeRestaurant.id);
+      return !error;
+    },
+    [activeRestaurant],
+  );
+
+  const uploadLogo = useCallback(
+    async (file: File) => {
+      if (!activeRestaurant) return false;
+      setUploadingLogo(true);
+      try {
+        const filePath = `${activeRestaurant.id}/logo-${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from("menu-images")
+          .upload(filePath, file);
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+          .from("menu-images")
+          .getPublicUrl(filePath);
+
+        const { error: updateError } = await supabase
+          .from("restaurants")
+          .update({ logo_url: data.publicUrl })
+          .eq("id", activeRestaurant.id);
+        if (updateError) throw updateError;
+
+        setLogoUrl(data.publicUrl);
+        return true;
+      } catch {
+        return false;
+      } finally {
+        setUploadingLogo(false);
+      }
     },
     [activeRestaurant],
   );
@@ -136,9 +213,6 @@ export function useMenuDigital() {
     return true;
   }, []);
 
-  // Reordenar intercambiando display_order con la categoría vecina —
-  // simple y suficiente para listas cortas; si más adelante tienen
-  // muchas categorías, ahí sí vale la pena drag-and-drop.
   const moveCategory = useCallback(
     async (id: string, direction: "up" | "down") => {
       const index = categories.findIndex((c) => c.id === id);
@@ -181,6 +255,13 @@ export function useMenuDigital() {
     saving,
     saveSlug,
     toggleMenuPublic,
+    themePalette,
+    saveThemePalette,
+    menuTemplate,
+    saveMenuTemplate,
+    logoUrl,
+    uploadingLogo,
+    uploadLogo,
     categories,
     createCategory,
     renameCategory,

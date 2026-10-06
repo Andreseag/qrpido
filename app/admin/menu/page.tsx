@@ -1,10 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import { QrCode, Eye, EyeOff, Check } from "lucide-react";
-import { useMenuDigital } from "./hooks/Usemenudigital";
 import RestaurantSelector from "@/app/components/Restaurantselector/Restaurantselector";
 import { CategoryManager } from "@/app/components/Categorymanager/Categorymanager";
 import { QrCodeGenerator } from "@/app/components/Qrcodegenerator/Qrcodegenerator";
+import { PaletteSelector } from "@/app/components/Paletteselector/Paletteselector";
+import { LogoUploader } from "@/app/components/Logouploader/Logouploader";
+import { TemplateSelector } from "@/app/components/Templateselector/Templateselector";
+import { useMenuDigital } from "./hooks/Usemenudigital";
 
 export default function MenuDigitalPage() {
   const {
@@ -17,6 +20,13 @@ export default function MenuDigitalPage() {
     saving,
     saveSlug,
     toggleMenuPublic,
+    themePalette,
+    saveThemePalette,
+    menuTemplate,
+    saveMenuTemplate,
+    logoUrl,
+    uploadingLogo,
+    uploadLogo,
     categories,
     createCategory,
     renameCategory,
@@ -42,21 +52,18 @@ export default function MenuDigitalPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 md:p-10">
-      {/* Header Adaptativo */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border pb-6 mb-8 gap-4">
-        <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-          <div className="bg-primary/10 p-2.5 sm:p-3 rounded-2xl border border-primary/20 shrink-0">
-            <QrCode className="text-primary w-6 h-6 sm:w-8 sm:h-8" />
-          </div>
-          <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-              Menú Digital
-            </h1>
-            <p className="text-xs text-muted-foreground font-medium">
-              Configura tu menú público y descarga el QR para tus mesas
-            </p>
-          </div>
+    <div className="p-6 md:p-10">
+      <header className="flex items-center gap-3 border-b border-border pb-6 mb-8">
+        <div className="bg-primary/10 p-3 rounded-2xl border border-primary/20">
+          <QrCode className="text-primary w-8 h-8" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-foreground">
+            Menú Digital
+          </h1>
+          <p className="text-xs text-muted-foreground font-medium">
+            Configura tu menú público, personalízalo y descarga el QR
+          </p>
         </div>
       </header>
 
@@ -71,50 +78,42 @@ export default function MenuDigitalPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
             {/* URL pública / slug */}
-            <div className="bg-surface border border-border rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm">
+            <div className="bg-surface border border-border rounded-3xl p-6 space-y-4">
               <h2 className="text-sm font-black text-foreground uppercase tracking-wider">
                 Dirección del Menú
               </h2>
-
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase text-muted-foreground block">
+              <div>
+                <label className="text-[10px] font-bold uppercase text-muted-foreground block mb-1.5">
                   URL personalizada
                 </label>
-
-                {/* Contenedor Adaptativo de la URL (Móvil: Columna / Desktop: Fila) */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-background border border-border p-2 rounded-2xl focus-within:border-primary transition">
-                  <span className="text-xs text-muted-foreground font-mono px-2 py-1 bg-surface/80 rounded-xl truncate">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground shrink-0">
                     {origin}/menu/
                   </span>
-
-                  <div className="flex items-center gap-2 flex-1">
-                    <input
-                      value={slugInput}
-                      onChange={(e) => setSlugInput(e.target.value)}
-                      className="w-full bg-transparent text-foreground text-xs font-bold outline-none px-1"
-                      placeholder="tu-restaurante"
-                    />
-                    <button
-                      onClick={() => saveSlug(slugInput)}
-                      disabled={saving || slugInput === slug}
-                      className="bg-primary hover:bg-primary/90 disabled:opacity-40 text-primary-foreground p-2.5 rounded-xl transition shrink-0 cursor-pointer active:scale-95">
-                      <Check className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <input
+                    value={slugInput}
+                    onChange={(e) => setSlugInput(e.target.value)}
+                    className="flex-1 p-2.5 bg-background border border-border rounded-xl text-foreground text-xs outline-none focus:border-primary"
+                  />
+                  <button
+                    onClick={() => saveSlug(slugInput)}
+                    disabled={saving || slugInput === slug}
+                    className="bg-primary hover:bg-primary/90 disabled:opacity-40 text-primary-foreground p-2.5 rounded-xl cursor-pointer">
+                    <Check className="w-4 h-4" />
+                  </button>
                 </div>
-
-                <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">
+                <p className="text-[10px] text-muted-foreground mt-1.5">
                   Si cambias esto después de imprimir el QR, el código impreso
                   dejará de funcionar — solo cámbialo si es necesario.
                 </p>
               </div>
 
-              <div className="flex items-center justify-between bg-background border border-border rounded-2xl p-3.5">
-                <div className="flex items-center gap-2.5">
+              <div className="flex items-center justify-between bg-background border border-border rounded-xl p-3">
+                <div className="flex items-center gap-2">
                   {isMenuPublic ? (
-                    <Eye className="w-4 h-4 text-success shrink-0" />
+                    <Eye className="w-4 h-4 text-success" />
                   ) : (
-                    <EyeOff className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <EyeOff className="w-4 h-4 text-muted-foreground" />
                   )}
                   <span className="text-xs font-bold text-foreground">
                     Menú {isMenuPublic ? "visible al público" : "oculto"}
@@ -124,7 +123,7 @@ export default function MenuDigitalPage() {
                   onClick={() => toggleMenuPublic(!isMenuPublic)}
                   role="switch"
                   aria-checked={isMenuPublic}
-                  className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer shrink-0 ${
+                  className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer ${
                     isMenuPublic ? "bg-primary" : "bg-border"
                   }`}>
                   <span
@@ -136,6 +135,22 @@ export default function MenuDigitalPage() {
               </div>
             </div>
 
+            <LogoUploader
+              logoUrl={logoUrl}
+              uploading={uploadingLogo}
+              onUpload={uploadLogo}
+            />
+
+            <TemplateSelector
+              selectedId={menuTemplate}
+              onSelect={saveMenuTemplate}
+            />
+
+            <PaletteSelector
+              selectedId={themePalette}
+              onSelect={saveThemePalette}
+            />
+
             <CategoryManager
               categories={categories}
               onCreate={createCategory}
@@ -145,8 +160,15 @@ export default function MenuDigitalPage() {
             />
           </div>
 
-          <div className="w-full">
+          <div className="space-y-4">
             {origin && <QrCodeGenerator menuUrl={menuUrl} />}
+            <a
+              href={menuUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="block text-center text-xs font-bold text-primary hover:underline">
+              Abrir vista previa del menú público →
+            </a>
           </div>
         </div>
       )}

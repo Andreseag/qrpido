@@ -18,6 +18,9 @@ export interface PublicMenuCategory {
 
 export interface PublicMenuData {
   restaurantName: string;
+  logoUrl: string | null;
+  themePalette: string;
+  menuTemplate: string;
   categories: PublicMenuCategory[];
   uncategorized: PublicMenuProduct[];
 }

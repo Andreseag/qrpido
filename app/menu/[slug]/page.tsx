@@ -44,8 +44,6 @@ export default async function PublicMenuPage({ params }: MenuPageProps) {
     sections,
   };
 
-  console.log("menu", menu);
-
   return (
     <div style={themeStyle}>
       {menu.menuTemplate === "grid" ? (

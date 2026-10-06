@@ -43,8 +43,6 @@ export default function CashRegisterModal({
     }
   }, [suggestedBase]);
 
-  console.log("isOpen: ", isOpen);
-
   if (!isOpen) return null;
 
   // Cálculos automáticos para el Cierre

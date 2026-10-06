@@ -28,8 +28,6 @@ export default function useCashRegister() {
   // interrumpía al usuario cada vez que este efecto se disparaba
   // (cada cambio de restaurante, cada remount del componente).
   useEffect(() => {
-    console.log("DEBUGGER");
-
     if (selectedRestaurantId) {
       loadCashStatus(selectedRestaurantId);
     } else {

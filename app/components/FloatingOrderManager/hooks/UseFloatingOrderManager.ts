@@ -2,11 +2,6 @@
 
 import { useSelectedRestaurant } from "@/app/context/Selectedrestaurantcontext";
 import { supabase } from "@/app/lib/supabase";
-import {
-  closeCashRegister,
-  getCashRegisterStatus,
-  openCashRegister,
-} from "@/app/services/cashRegisterService";
 import { useEffect, useRef, useState } from "react";
 
 interface Product {
@@ -79,7 +74,6 @@ export function UseFloatingOrderManager({
     setTimeout(() => setToast(null), 3500);
   };
 
-  // 🛠️ Función auxiliar para guardar explícitamente en localStorage
   const saveToLocalStorage = (
     currentDrafts: OrderDraft[],
     currentActiveId: string | null,
@@ -105,7 +99,6 @@ export function UseFloatingOrderManager({
     }
   };
 
-  // 1. Cargar borradores al cambiar o tener disponible el restaurante
   useEffect(() => {
     if (!selectedRestaurantId) return;
     if (loadedRestaurantRef.current === selectedRestaurantId) return;
@@ -142,7 +135,6 @@ export function UseFloatingOrderManager({
     }
   }, [selectedRestaurantId]);
 
-  // Manejar cliente inicial de WhatsApp
   useEffect(() => {
     if (!initialClientData || !initialClientData.name || !selectedRestaurantId)
       return;
@@ -189,7 +181,6 @@ export function UseFloatingOrderManager({
     setIsMinimized(false);
   }, [initialClientData, selectedRestaurantId]);
 
-  // Asegurar que activeDraftId sea válido si la lista cambia
   useEffect(() => {
     if (
       drafts.length > 0 &&
@@ -234,7 +225,9 @@ export function UseFloatingOrderManager({
       .select("*")
       .eq("restaurant_id", selectedRestaurantId)
       .eq("phone", phone)
-      .single();
+      .maybeSingle(); // antes .single() — con cliente nuevo no hay fila y
+    // .single() lo trata como error; maybeSingle() simplemente da null,
+    // sin ruido en consola.
 
     setDrafts((prev) => {
       const next = prev.map((d) =>
@@ -246,7 +239,11 @@ export function UseFloatingOrderManager({
               customerPersistentNotes: data
                 ? data.notes || ""
                 : d.customerPersistentNotes,
-              address: data.last_address,
+              // Antes: `data.last_address` sin guardia — tronaba con
+              // clientes nuevos porque `data` era null. Si no hay
+              // cliente o no tiene dirección guardada, se conserva la
+              // que el cajero ya haya escrito en el draft.
+              address: data?.last_address || d.address,
             }
           : d,
       );
@@ -285,10 +282,8 @@ export function UseFloatingOrderManager({
     if (!draftId) return;
 
     setDrafts((prev) => {
-      // 1. Filtrar usando el estado más reciente (prev)
       const nextDrafts = prev.filter((d) => d.draftId !== draftId);
 
-      // 2. Calcular el nuevo ID activo de forma segura
       let nextActiveId = activeDraftId;
       if (activeDraftId === draftId) {
         nextActiveId =
@@ -297,10 +292,7 @@ export function UseFloatingOrderManager({
             : null;
       }
 
-      // 3. Actualizar el estado activo
       setActiveDraftId(nextActiveId);
-
-      // 4. Guardar explícitamente en localStorage con los datos frescos
       saveToLocalStorage(nextDrafts, nextActiveId);
 
       return nextDrafts;
@@ -371,11 +363,22 @@ export function UseFloatingOrderManager({
     });
   };
 
-  const submitOrder = async (draft: OrderDraft) => {
+  // Ahora recibe el id de la caja activa (se lo pasa el componente desde
+  // useCashRegister). Null/undefined = caja cerrada = no se crea la orden.
+  const submitOrder = async (
+    draft: OrderDraft,
+    cashRegisterId: string | null,
+  ) => {
     if (!selectedRestaurantId) {
       showToast("No hay restaurante asignado.", "error");
       return;
     }
+
+    if (!cashRegisterId) {
+      showToast("Debes abrir la caja antes de registrar pedidos.", "error");
+      return;
+    }
+
     if (draft.selectedItems.length === 0) {
       showToast("Agrega al menos un producto al pedido.", "error");
       return;
@@ -428,14 +431,25 @@ export function UseFloatingOrderManager({
       0,
     );
 
+    // El <select> de mesa guarda el id de la mesa en tableNumber/tableId
+    // (ver el onChange en el componente). Para que table_number quede
+    // con el NÚMERO real (lo que usa el módulo de Mesas para agrupar),
+    // hay que resolverlo contra la lista de mesas cargada.
+    const selectedTable =
+      draft.orderType === "mesa"
+        ? tables.find((t) => String(t.id) === String(draft.tableId))
+        : null;
+
     const orderPayload = {
       restaurant_id: selectedRestaurantId,
+      cash_register_id: cashRegisterId,
       customer_id: customerId,
       customer_name: draft.customerName || "Cliente Mostrador",
       customer_phone: draft.customerPhone || "",
       order_type: draft.orderType,
-      table_number: draft.orderType === "mesa" ? draft.tableNumber : null,
-      table_id: draft.orderType === "mesa" ? draft.tableNumber : null,
+      table_number:
+        draft.orderType === "mesa" ? (selectedTable?.number ?? null) : null,
+      table_id: draft.orderType === "mesa" ? draft.tableId || null : null,
       address: draft.orderType === "domicilio" ? draft.address : null,
       payment_method:
         draft.orderType === "domicilio" ? draft.paymentMethod : "local",
@@ -455,7 +469,7 @@ export function UseFloatingOrderManager({
       showToast("Error al crear el pedido: " + error.message, "error");
     } else {
       showToast("¡Pedido creado y cliente registrado/actualizado con éxito!");
-      closeDraft(draft.draftId); // Esto ahora limpia y actualiza el localStorage automáticamente
+      closeDraft(draft.draftId);
     }
   };
 

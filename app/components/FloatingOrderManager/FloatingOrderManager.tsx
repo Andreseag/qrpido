@@ -12,10 +12,11 @@ import {
   AlertCircle,
   Search,
   Minus,
+  Lock,
 } from "lucide-react";
 import { UseFloatingOrderManager } from "./hooks/UseFloatingOrderManager";
 import CashRegisterModal from "../CashRegisterModal/CashRegisterModal";
-import UseCashRegister from "./hooks/UseCashRegister";
+import useCashRegister from "./hooks/UseCashRegister";
 
 interface FloatingOrderManagerProps {
   isOpen?: boolean;
@@ -57,9 +58,8 @@ export default function FloatingOrderManager({
     setExpectedAmount,
     suggestedBase,
     setSuggestedBase,
-    setActiveCashRegister,
     handleCashModalSubmit,
-  } = UseCashRegister();
+  } = useCashRegister();
 
   // Estado local para el buscador de productos
   const [productSearch, setProductSearch] = useState("");
@@ -67,6 +67,26 @@ export default function FloatingOrderManager({
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(productSearch.toLowerCase()),
   );
+
+  const isCashRegisterOpen = Boolean(activeCashRegister);
+
+  // Único punto de entrada para "quiero crear un pedido nuevo": si la
+  // caja está cerrada, redirige a abrirla en vez de dejar que el
+  // cajero llene un pedido que después no va a poder enviar. Usado por
+  // los dos botones de "Nuevo Pedido" que tiene el componente.
+  const handleRequestNewDraft = () => {
+    if (!isCashRegisterOpen) {
+      setCashModalMode("open");
+      setIsCashModalOpen(true);
+      return;
+    }
+    openNewDraft();
+  };
+
+  const handleSubmitOrder = () => {
+    if (!activeDraft) return;
+    submitOrder(activeDraft, activeCashRegister?.id ?? null);
+  };
 
   return (
     <>
@@ -85,7 +105,7 @@ export default function FloatingOrderManager({
       {/* Botón flotante para crear nuevo pedido (Solo si no hay borradores activos) */}
       {drafts.length === 0 && (
         <button
-          onClick={openNewDraft}
+          onClick={handleRequestNewDraft}
           className="fixed bottom-6 right-6 z-40 bg-primary hover:bg-primary/90 text-primary-foreground font-black px-6 py-4 rounded-full shadow-2xl flex items-center gap-3 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-primary/40">
           <Plus className="w-6 h-6 stroke-[3]" />
           <span className="text-xs uppercase tracking-wider">Nuevo Pedido</span>
@@ -114,7 +134,6 @@ export default function FloatingOrderManager({
             /* 🔼 Contenedor principal expandido */
             <div className="fixed inset-0 z-50 flex flex-col bg-surface md:inset-auto md:bottom-6 md:right-6 md:w-[750px] md:max-h-[90vh] md:rounded-3xl md:border md:border-border md:shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
               {/* Tira de pestañas y controles superiores */}
-              {/* Tira de pestañas y controles superiores */}
               <div className="flex items-center justify-between bg-background border-b border-border px-3 pt-2">
                 {/* Pestañas de pedidos */}
                 <div className="flex items-end gap-1 overflow-x-auto scrollbar-none pt-2 flex-1">
@@ -124,13 +143,11 @@ export default function FloatingOrderManager({
                 {/* Controles superiores derechos: Estado de Caja + Nuevo + Minimizar */}
                 <div className="flex items-center gap-2 ml-2 shrink-0 pb-2">
                   {/* 🟢 Indicador / Botón de Caja */}
-                  {activeCashRegister ? (
+                  {isCashRegisterOpen ? (
                     <button
                       onClick={() => {
-                        // Si ya hay caja abierta, hacer clic permite ver el cierre o arqueo
                         setCashModalMode("close");
-                        // Aquí calcularías el expectedAmount consultando las ventas en efectivo del día
-                        setExpectedAmount(180000); // Ejemplo de cálculo teóricas
+                        setExpectedAmount(expectedAmount);
                         setIsCashModalOpen(true);
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-success/10 hover:bg-success/20 text-success border border-success/20 rounded-xl text-xs font-bold transition-all cursor-pointer"
@@ -153,15 +170,7 @@ export default function FloatingOrderManager({
 
                   {/* Botón Nuevo Pedido */}
                   <button
-                    onClick={() => {
-                      // Validación opcional: Si no hay caja abierta, forzar apertura antes de dejar crear pedidos
-                      if (!activeCashRegister) {
-                        setCashModalMode("open");
-                        setIsCashModalOpen(true);
-                        return;
-                      }
-                      openNewDraft();
-                    }}
+                    onClick={handleRequestNewDraft}
                     className="flex items-center gap-1 px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-bold transition-all cursor-pointer">
                     <Plus className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Nuevo</span>
@@ -177,6 +186,19 @@ export default function FloatingOrderManager({
                   </button>
                 </div>
               </div>
+
+              {/* Aviso cuando la caja está cerrada pero ya hay un borrador
+                  abierto (por ejemplo, vino de WhatsApp) — deja ver/editar
+                  el pedido, pero no enviarlo. */}
+              {!isCashRegisterOpen && (
+                <div className="px-4 py-2.5 bg-danger/10 border-b border-danger/20 flex items-center gap-2">
+                  <Lock className="w-3.5 h-3.5 text-danger shrink-0" />
+                  <span className="text-[11px] font-bold text-danger">
+                    La caja está cerrada — puedes seguir armando el pedido, pero
+                    no podrás enviarlo hasta abrirla.
+                  </span>
+                </div>
+              )}
 
               {/* Panel del pedido activo */}
               {activeDraft && (
@@ -302,7 +324,7 @@ export default function FloatingOrderManager({
                               Seleccionar Mesa
                             </label>
                             <select
-                              value={activeDraft.tableNumber}
+                              value={activeDraft.tableId}
                               onChange={(e) =>
                                 updateDraft(activeDraft.draftId, {
                                   tableNumber: e.target.value,
@@ -546,9 +568,20 @@ export default function FloatingOrderManager({
                       </button>
                       <button
                         type="button"
-                        onClick={() => submitOrder(activeDraft)}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-primary/20">
-                        <Send className="w-4 h-4" /> Enviar Pedido
+                        disabled={!isCashRegisterOpen}
+                        onClick={handleSubmitOrder}
+                        title={
+                          isCashRegisterOpen
+                            ? undefined
+                            : "Abre la caja para poder enviar pedidos"
+                        }
+                        className="bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-primary/20">
+                        {isCashRegisterOpen ? (
+                          <Send className="w-4 h-4" />
+                        ) : (
+                          <Lock className="w-4 h-4" />
+                        )}
+                        Enviar Pedido
                       </button>
                     </div>
                   </div>

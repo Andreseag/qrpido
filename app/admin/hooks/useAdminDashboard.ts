@@ -105,10 +105,10 @@ export function useAdminDashboard() {
     [rawOrders, filter, dateRange],
   );
 
-  // Métricas financieras derivadas de las órdenes filtradas
+  // Métricas financieras derivadas de las órdenes filtradas y el total bruto (rawOrders) para hoy
   const metrics = useMemo(
-    () => calculateDashboardMetrics(filteredOrders),
-    [filteredOrders],
+    () => calculateDashboardMetrics(filteredOrders, rawOrders),
+    [filteredOrders, rawOrders],
   );
 
   const refresh = useCallback(() => {

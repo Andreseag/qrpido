@@ -2,13 +2,17 @@ import { Order, TopProduct } from "../../types/dashboard";
 
 export interface DashboardMetrics {
   totalRevenue: number;
+  todayRevenue: number; // 👈 Nuevo indicador exclusivo para el día actual
   totalOrdersCount: number;
   averageTicket: number;
   totalNetProfit: number;
   topProducts: TopProduct[];
 }
 
-export function calculateDashboardMetrics(orders: Order[]): DashboardMetrics {
+export function calculateDashboardMetrics(
+  orders: Order[],
+  allOrders: Order[] = [],
+): DashboardMetrics {
   let revenue = 0;
   let netProfit = 0;
   const count = orders.length;
@@ -16,6 +20,25 @@ export function calculateDashboardMetrics(orders: Order[]): DashboardMetrics {
     [key: string]: { quantity: number; revenue: number };
   } = {};
 
+  // 1. Calcular las ventas netas EXCLUSIVAMENTE del día actual usando rawOrders (allOrders)
+  const today = new Date();
+  let todayRevenue = 0;
+  const sourceOrdersForToday = allOrders.length > 0 ? allOrders : orders;
+
+  sourceOrdersForToday.forEach((order) => {
+    if (order.created_at) {
+      const orderDate = new Date(order.created_at);
+      if (
+        orderDate.getDate() === today.getDate() &&
+        orderDate.getMonth() === today.getMonth() &&
+        orderDate.getFullYear() === today.getFullYear()
+      ) {
+        todayRevenue += Number(order.total_price) || 0;
+      }
+    }
+  });
+
+  // 2. Procesar las órdenes filtradas para el resto de métricas (Gráficos, Top Products, Profit del periodo)
   orders.forEach((order) => {
     revenue += Number(order.total_price) || 0;
     if (order.items && Array.isArray(order.items)) {
@@ -49,6 +72,7 @@ export function calculateDashboardMetrics(orders: Order[]): DashboardMetrics {
 
   return {
     totalRevenue: revenue,
+    todayRevenue,
     totalOrdersCount: count,
     averageTicket: avg,
     totalNetProfit: netProfit,

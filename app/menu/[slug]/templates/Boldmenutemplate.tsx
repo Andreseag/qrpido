@@ -108,6 +108,14 @@ const CSS = `
   box-shadow:0 6px 0 var(--bt-deep), var(--bt-shadow);
   font-size:clamp(1.05rem, 3.6vw, 1.55rem); letter-spacing:.02em; line-height:1.1;
 }
+
+.btn-primary{
+  background:var(--primary); color:var(--primary-foreground);
+  border-radius:9999px; padding: .7em 1.8em; transform:rotate(-2deg);
+  box-shadow:0 6px 0 var(--bt-deep), var(--bt-shadow);
+  font-size:clamp(1.05rem, 3.6vw, 1.55rem); letter-spacing:.02em; line-height:1.1;
+}
+
 .bt-soldout{
   display:inline-block; font-size:.62rem; font-weight:800; letter-spacing:.08em;
   text-transform:uppercase; padding:.2em .7em; border-radius:9999px;
@@ -707,7 +715,7 @@ export function BoldMenuTemplate({
           aria-modal="true"
           aria-labelledby="bt-modal-title"
           onKeyDown={trapTab}
-          className="bt-modal relative max-h-[88vh] w-full max-w-[720px] overflow-auto rounded-[20px] bg-surface p-6 text-foreground sm:p-10">
+          className="bt-modal relative max-h-[88vh] w-full max-w-[720px] overflow-auto rounded-[20px] bg-surface px-6 py-12 text-foreground sm:p-10">
           <button
             ref={closeBtnRef}
             type="button"
@@ -760,7 +768,7 @@ export function BoldMenuTemplate({
               <button
                 type="button"
                 onClick={closeDish}
-                className="mt-7 w-full cursor-pointer rounded-xl bg-primary px-6 py-3 text-sm font-bold tracking-wide text-primary-foreground transition-opacity hover:opacity-90 sm:hidden">
+                className="mt-7 w-full cursor-pointer btn-primary sm:hidden">
                 Cerrar
               </button>
             </>

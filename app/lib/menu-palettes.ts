@@ -105,7 +105,13 @@ export function getPalette(id: string): MenuPalette {
   return MENU_PALETTES.find((p) => p.id === id) || MENU_PALETTES[0];
 }
 
-export const MENU_TEMPLATES = ["classic", "grid", "elegant"] as const;
+export const MENU_TEMPLATES = [
+  "classic",
+  "grid",
+  "elegant",
+  "modern",
+  "bold",
+] as const;
 export type MenuTemplateId = (typeof MENU_TEMPLATES)[number];
 
 export const MENU_TEMPLATE_LABELS: Record<
@@ -124,5 +130,14 @@ export const MENU_TEMPLATE_LABELS: Record<
   elegant: {
     name: "Elegante",
     description: "Minimalista, sin fotos, tipo carta de restaurante fino.",
+  },
+  modern: {
+    name: "Moderno",
+    description: "Diseño actual y versátil para presentar tu menú.",
+  },
+  bold: {
+    name: "Urbano (Cartel)",
+    description:
+      "Tipografía enorme, animaciones y platos en zig-zag. Ideal para hamburgueserías, comida rápida y bares.",
   },
 };

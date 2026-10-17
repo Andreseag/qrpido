@@ -5,9 +5,21 @@ import { buildSections } from "./buildSections";
 import { GridMenuTemplate } from "./templates/Gridmenutemplate";
 import { ElegantMenuTemplate } from "./templates/Elegantmenutemplate";
 import { ClassicMenuTemplate } from "./templates/ClassicMenuTemplate";
+import { ModernMenuTemplate } from "./templates/ModernMenuTemplate";
+import { ComponentType } from "react";
+import { MenuTemplateProps } from "./templates/types";
+import { BoldMenuTemplate } from "./templates/Boldmenutemplate";
 
 // Cachea la página 5 minutos: el menú no cambia segundo a segundo.
 export const revalidate = 300;
+
+const TEMPLATES: Record<string, ComponentType<MenuTemplateProps>> = {
+  classic: ClassicMenuTemplate,
+  grid: GridMenuTemplate,
+  elegant: ElegantMenuTemplate,
+  modern: ModernMenuTemplate,
+  bold: BoldMenuTemplate,
+};
 
 interface MenuPageProps {
   params: Promise<{ slug: string }>;
@@ -20,6 +32,8 @@ export default async function PublicMenuPage({ params }: MenuPageProps) {
 
   const palette = getPalette(menu.themePalette);
   const sections = buildSections(menu);
+
+  const Template = TEMPLATES[menu.menuTemplate] ?? ClassicMenuTemplate;
 
   // Estas variables CSS pisan (por especificidad de inline style) lo
   // que venga de :root/.dark en globals.css — el look de marca del
@@ -46,13 +60,7 @@ export default async function PublicMenuPage({ params }: MenuPageProps) {
 
   return (
     <div style={themeStyle}>
-      {menu.menuTemplate === "grid" ? (
-        <GridMenuTemplate {...templateProps} />
-      ) : menu.menuTemplate === "elegant" ? (
-        <ElegantMenuTemplate {...templateProps} />
-      ) : (
-        <ClassicMenuTemplate {...templateProps} />
-      )}
+      <Template {...templateProps} />
     </div>
   );
 }

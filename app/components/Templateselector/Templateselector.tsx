@@ -1,5 +1,11 @@
 "use client";
-import { Check, LayoutList, LayoutGrid, AlignCenter } from "lucide-react";
+import {
+  Check,
+  LayoutList,
+  LayoutGrid,
+  AlignCenter,
+  Flame,
+} from "lucide-react";
 import { MENU_TEMPLATES, MENU_TEMPLATE_LABELS } from "@/app/lib/menu-palettes";
 
 interface TemplateSelectorProps {
@@ -11,6 +17,8 @@ const TEMPLATE_ICONS: Record<string, React.ElementType> = {
   classic: LayoutList,
   grid: LayoutGrid,
   elegant: AlignCenter,
+  modern: LayoutGrid,
+  bold: Flame,
 };
 
 export function TemplateSelector({

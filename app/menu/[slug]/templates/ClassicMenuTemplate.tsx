@@ -1,8 +1,9 @@
-// "use client";
+"use client";
 
 import Image from "next/image";
 import { Store, UtensilsCrossed } from "lucide-react";
 import { MenuTemplateProps } from "./types";
+import { useState } from "react";
 // import { useState } from "react";
 
 export function ClassicMenuTemplate({
@@ -11,18 +12,18 @@ export function ClassicMenuTemplate({
   sections,
 }: MenuTemplateProps) {
   // Estados para controlar el modal del plato seleccionado
-  // const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
-  // const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // const handleOpenProduct = (product: any) => {
-  //   setSelectedProduct(product);
-  //   setIsModalOpen(true);
-  // };
+  const handleOpenProduct = (product: any) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
 
-  // const handleCloseModal = () => {
-  //   setIsModalOpen(false);
-  //   setSelectedProduct(null);
-  // };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">

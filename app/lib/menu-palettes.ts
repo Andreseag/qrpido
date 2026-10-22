@@ -12,6 +12,17 @@ export interface MenuPalette {
 
 export const MENU_PALETTES: MenuPalette[] = [
   {
+    id: "warm_amber_orange",
+    name: "Naranja Cálido",
+    background: "#fefaf6", // Blanco cálido suave
+    surface: "#ffffff", // Blanco puro para tarjetas
+    border: "#f4ded0", // Borde suave en tono crema/terracota claro
+    foreground: "#2c1810", // Texto principal oscuro (marrón café) para máximo contraste
+    mutedForeground: "#8c6b58", // Texto secundario/deshabilitado
+    primary: "#FC4F01", // Color primario
+    primaryForeground: "#ffffff", // Texto sobre el primario (blanco para mayor contraste)
+  },
+  {
     id: "amber_classic",
     name: "Ámbar Clásico",
     background: "#fffbeb",

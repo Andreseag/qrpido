@@ -34,6 +34,20 @@ export function useAdminTables() {
     [],
   );
 
+  // 🚀 Función auxiliar para obtener la caja activa del restaurante actual
+  const getActiveCashRegisterId = async (): Promise<string | null> => {
+    if (!selectedRestaurantId) return null;
+    const { data, error } = await supabase
+      .from("cash_registers")
+      .select("id")
+      .eq("restaurant_id", selectedRestaurantId)
+      .is("closed_at", null)
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return data.id;
+  };
+
   const fetchAllData = useCallback(async () => {
     if (!selectedRestaurantId) {
       setLoading(false);
@@ -63,7 +77,9 @@ export function useAdminTables() {
     // 2. Órdenes activas (excluyendo pagadas)
     const { data: ordersData } = await supabase
       .from("orders")
-      .select("id, table_id, total_price, state, items, note, created_at")
+      .select(
+        "id, table_id, total_price, state, items, note, created_at, cash_register_id",
+      )
       .eq("restaurant_id", selectedRestaurantId)
       .in("state", ["en_cocina", "preparando", "listo", "entregado"]);
     if (ordersData) setActiveOrders(ordersData as ActiveOrder[]);
@@ -166,6 +182,16 @@ export function useAdminTables() {
         return false;
       }
 
+      // 🚀 Validar que exista una caja abierta antes de permitir mandar la orden
+      const cashRegisterId = await getActiveCashRegisterId();
+      if (!cashRegisterId) {
+        showToast(
+          "Debes abrir la caja antes de registrar pedidos en mesas.",
+          "error",
+        );
+        return false;
+      }
+
       setIsSaving(true);
       const totalPrice = cart.reduce(
         (sum, item) => sum + item.price * item.quantity,
@@ -177,6 +203,7 @@ export function useAdminTables() {
         .insert([
           {
             restaurant_id: selectedRestaurantId,
+            cash_register_id: cashRegisterId, // 👈 Asociamos la orden a la caja activa
             table_id: tableId,
             order_type: "mesa",
             state: "en_cocina",
@@ -218,6 +245,7 @@ export function useAdminTables() {
       setIsSaving(true);
       const orderIds = tableOrders.map((o) => o.id);
 
+      // 1. Guardar el registro general del pago (Sin el cash_register_id que sobraba)
       const { error: paymentError } = await supabase.from("payments").insert([
         {
           restaurant_id: selectedRestaurantId,
@@ -234,9 +262,14 @@ export function useAdminTables() {
         return false;
       }
 
+      // 2. Actualizar las órdenes de la mesa: marcarlas como pagadas Y guardar el método de pago
+      // (Esto es vital para que el arqueo de caja sume solo las que son 'cash')
       const { error } = await supabase
         .from("orders")
-        .update({ state: "pagado" })
+        .update({
+          state: "pagado",
+          payment_method: paymentMethod, // 👈 Guardamos el método para que el servicio de caja lo filtre
+        })
         .in("id", orderIds);
 
       setIsSaving(false);
@@ -246,6 +279,7 @@ export function useAdminTables() {
         showToast("¡Cuenta cobrada y mesa liberada con éxito! 🥂", "success");
         return true;
       }
+
       showToast("Error al cobrar cuenta: " + error.message, "error");
       return false;
     },

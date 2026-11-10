@@ -59,6 +59,7 @@ export default function FloatingOrderManager({
     suggestedBase,
     setSuggestedBase,
     handleCashModalSubmit,
+    loadCashStatus,
   } = useCashRegister();
 
   // Estado local para el buscador de productos
@@ -78,6 +79,7 @@ export default function FloatingOrderManager({
     if (!isCashRegisterOpen) {
       setCashModalMode("open");
       setIsCashModalOpen(true);
+      loadCashStatus();
       return;
     }
     openNewDraft();
@@ -147,7 +149,7 @@ export default function FloatingOrderManager({
                     <button
                       onClick={() => {
                         setCashModalMode("close");
-                        setExpectedAmount(expectedAmount);
+                        loadCashStatus();
                         setIsCashModalOpen(true);
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 bg-success/10 hover:bg-success/20 text-success border border-success/20 rounded-xl text-xs font-bold transition-all cursor-pointer"

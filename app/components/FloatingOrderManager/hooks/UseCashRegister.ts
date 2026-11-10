@@ -29,7 +29,7 @@ export default function useCashRegister() {
   // (cada cambio de restaurante, cada remount del componente).
   useEffect(() => {
     if (selectedRestaurantId) {
-      loadCashStatus(selectedRestaurantId);
+      loadCashStatus();
     } else {
       // Sin restaurante activo no hay caja que mostrar — evita quedar
       // con el estado de la caja del restaurante anterior.
@@ -37,7 +37,10 @@ export default function useCashRegister() {
     }
   }, [selectedRestaurantId]);
 
-  const loadCashStatus = async (restaurantId: string) => {
+  const loadCashStatus = async () => {
+    console.log("loadCashStatus");
+    if (!selectedRestaurantId) return;
+
     setLoadingStatus(true);
     try {
       // ⚠️ Ajusta la firma real de tu servicio para que reciba
@@ -45,7 +48,7 @@ export default function useCashRegister() {
       // restaurante, en un SaaS multi-tenant puede traerte la caja
       // de otro restaurante que administras.
       const { activeRegister, expectedAmount, suggestedBase } =
-        await getCashRegisterStatus(restaurantId);
+        await getCashRegisterStatus(selectedRestaurantId);
       setActiveCashRegister(activeRegister);
       setExpectedAmount(expectedAmount);
       setSuggestedBase(suggestedBase);
@@ -58,6 +61,7 @@ export default function useCashRegister() {
 
   // 2. Manejar el envío del Modal (Apertura o Cierre)
   const handleCashModalSubmit = async (data: any) => {
+    console.log("handleCashModalSubmit");
     if (!selectedRestaurantId) return;
     try {
       if (cashModalMode === "open") {
@@ -75,7 +79,7 @@ export default function useCashRegister() {
         setActiveCashRegister(null);
       }
       setIsCashModalOpen(false);
-      loadCashStatus(selectedRestaurantId);
+      loadCashStatus();
     } catch (error) {
       console.error("Error procesando la caja:", error);
       alert("Hubo un error al guardar la caja en la base de datos.");
@@ -95,5 +99,6 @@ export default function useCashRegister() {
     setSuggestedBase,
     setActiveCashRegister,
     handleCashModalSubmit,
+    loadCashStatus,
   };
 }

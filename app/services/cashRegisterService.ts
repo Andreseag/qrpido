@@ -3,44 +3,46 @@ import { supabase } from "../lib/supabase";
 // 1. Obtener el estado actual de la caja y la base sugerida —
 // SIEMPRE filtrado por restaurantId, para no mezclar cajas entre
 // distintos restaurantes de un mismo usuario.
+// Ejemplo conceptual de cómo calcular el expectedAmount en tu servicio
 export async function getCashRegisterStatus(restaurantId: string) {
-  const { data: activeRegister, error: activeError } = await supabase
+  // 1. Buscar la caja abierta actual del restaurante
+  const { data: activeRegister, error: regError } = await supabase
     .from("cash_registers")
     .select("*")
     .eq("restaurant_id", restaurantId)
-    .eq("status", "open")
-    .maybeSingle();
+    .is("closed_at", null) // O status = 'open'
+    .single();
 
-  if (activeError) throw activeError;
-
-  let expectedAmount = 0;
-
-  if (activeRegister) {
-    expectedAmount = await calculateExpectedAmount(
-      activeRegister.id,
-      activeRegister.initial_amount,
-    );
+  if (!activeRegister) {
+    return { activeRegister: null, expectedAmount: 0, suggestedBase: 100000 };
   }
 
-  // Última caja CERRADA de ESTE restaurante, para heredar la base
-  // sugerida del siguiente turno.
-  const { data: lastClosed, error: closedError } = await supabase
-    .from("cash_registers")
-    .select("next_shift_base")
-    .eq("restaurant_id", restaurantId)
-    .eq("status", "closed")
-    .order("closed_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // 2. Consultar las órdenes pagadas en EFECTIVO asociadas a esta caja
+  // (o creadas desde que se abrió la caja)
+  const { data: cashOrders, error: ordersError } = await supabase
+    .from("orders")
+    .select("total_price") // 👈 Cambiado de "total" a "total_price"
+    .eq("cash_register_id", activeRegister.id)
+    .eq("payment_method", "efectivo") // 'cash' o 'efectivo', según cómo lo guardes en el POS
+    .eq("state", "pagado"); // 👈 Cambiado de status: 'paid' a state: 'pagado'
 
-  if (closedError) console.error("Error buscando base anterior:", closedError);
+  // 3. Sumar las ventas en efectivo
+  const totalCashSales =
+    cashOrders?.reduce((sum, order) => sum + Number(order.total_price), 0) || 0;
 
-  const suggestedBase = lastClosed?.next_shift_base ?? 100000;
+  // 4. (Opcional) Sumar ingresos manuales y restar retiros manuales de caja si los hay
+  // const totalManualIn = ...
+  // const totalManualOut = ...
+
+  // 5. Calcular el Efectivo Esperado en Caja:
+  // Base Inicial + Ventas en Efectivo (+ Ingresos manuales - Retiros manuales)
+  const initialAmount = activeRegister.initial_amount || 0;
+  const expectedAmount = initialAmount + totalCashSales;
 
   return {
     activeRegister,
     expectedAmount,
-    suggestedBase,
+    suggestedBase: activeRegister.suggested_base || 100000,
   };
 }
 

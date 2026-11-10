@@ -16,6 +16,7 @@ import {
   QrCode,
   Menu,
   X,
+  Calculator,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/app/lib/supabase";
@@ -156,6 +157,12 @@ export default function AdminSidebar() {
       name: "Configuración",
       href: "/admin/settings",
       icon: Store,
+      roles: ["owner"],
+    },
+    {
+      name: "Arqueos de Caja",
+      href: "/admin/cash-history",
+      icon: Calculator, // O puedes usar Receipt según los íconos de lucide-react que ya importes
       roles: ["owner"],
     },
   ];

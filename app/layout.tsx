@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "./providers/ThemeProvider";
+import { PwaInstallModal } from "./components/PwaInstallModal/PwaInstallModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}>
         <ThemeProvider>{children}</ThemeProvider>
+        <PwaInstallModal />
       </body>
     </html>
   );

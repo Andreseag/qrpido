@@ -5,6 +5,7 @@ import { supabase } from "../lib/supabase";
 import AdminSidebar from "../components/AdminSidebar/AdminSidebar";
 import FloatingOrderManager from "../components/FloatingOrderManager/FloatingOrderManager";
 import { SelectedRestaurantProvider } from "../context/Selectedrestaurantcontext";
+import { PwaInstallModal } from "../components/PwaInstallModal/PwaInstallModal";
 // import FloatingWhatsAppChat from "../components/FloatingWhatsAppChat/FloatingWhatsAppChat";
 // import WhatsAppFloatingWidget from "../components/WhatsAppFloatingWidget/WhatsAppFloatingWidget";
 
@@ -53,6 +54,7 @@ export default function AdminLayout({
       <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row">
         {/* El Sidebar incluye la barra superior móvil y el menú lateral de escritorio */}
         <AdminSidebar />
+        <PwaInstallModal />
 
         {/* Contenido dinámico de la página actual */}
         <main className="flex-1 overflow-y-auto min-h-screen">{children}</main>

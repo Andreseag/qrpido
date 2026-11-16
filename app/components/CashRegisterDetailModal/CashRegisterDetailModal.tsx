@@ -10,8 +10,10 @@ import {
   Utensils,
   CheckCircle2,
   DollarSign,
+  Printer,
 } from "lucide-react";
 import { CashRegisterRecord } from "@/app/admin/cash-history/types";
+import { PrintTicket } from "../PrintTicket/PrintTicket";
 
 interface CashRegisterDetailModalProps {
   isOpen: boolean;
@@ -34,6 +36,9 @@ export function CashRegisterDetailModal({
 }: CashRegisterDetailModalProps) {
   const [activeTab, setActiveTab] = useState<"summary" | "orders">("summary");
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  // 🚀 Estado local para controlar la orden que se va a imprimir
+  const [orderToPrint, setOrderToPrint] = useState<any | null>(null);
 
   if (!isOpen || !register) return null;
 
@@ -243,6 +248,12 @@ export function CashRegisterDetailModal({
                             {formatCurrency(order.total_price)}
                           </span>
                         </div>
+                        <button
+                          onClick={() => setOrderToPrint(order)} // 👈 Abre el ticket de esta orden exacta
+                          className="bg-background border border-border hover:border-primary/50 text-foreground font-bold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer">
+                          <Printer className="w-3.5 h-3.5 text-primary" />{" "}
+                          Imprimir
+                        </button>
 
                         {!isPaid && (
                           <button
@@ -256,6 +267,12 @@ export function CashRegisterDetailModal({
                           </button>
                         )}
                       </div>
+                      {/* 🚀 Renderizamos el Modal de Impresión aquí mismo controlado por el estado */}
+                      <PrintTicket
+                        isOpen={Boolean(orderToPrint)}
+                        onClose={() => setOrderToPrint(null)}
+                        order={orderToPrint}
+                      />
                     </div>
                   );
                 })
